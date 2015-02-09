@@ -1,12 +1,12 @@
 package com.stephenwranger.compgeo.algorithms.convexhull;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import com.stephenwranger.compgeo.algorithms.Algorithm;
+import com.stephenwranger.compgeo.algorithms.AlgorithmUtils;
 import com.stephenwranger.graphics.collections.Pair;
 import com.stephenwranger.graphics.math.Tuple2d;
 
@@ -77,14 +77,6 @@ public class ConvexHullBruteForce implements Algorithm<Tuple2d> {
 
       output.addAll(outputSet);
       outputEdges.addAll(outputEdgesSet);
-      Collections.sort(output, new Comparator<Tuple2d>() {
-         @Override
-         public int compare(final Tuple2d v0, final Tuple2d v1) {
-            final int xCompare = Double.compare(v0.x, v1.x);
-            final int yCompare = Double.compare(v0.y, v1.y);
-
-            return (xCompare == 0) ? yCompare : xCompare;
-         }
-      });
+      Collections.sort(output, AlgorithmUtils.getComparator());
    }
 }
