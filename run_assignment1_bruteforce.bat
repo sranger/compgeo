@@ -1,0 +1,2 @@
+set CLASSPATH=%CLASSPATH%;./lib/com.stephenwranger.graphics.jar;./dist/com.stephenwranger.compgeo.jar
+java -Djava.net.useSystemProxies=true -Xmx2048m com.stephenwranger.compgeo.assignment1.Assignment1 BruteForce %1

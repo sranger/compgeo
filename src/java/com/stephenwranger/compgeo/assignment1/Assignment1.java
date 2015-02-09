@@ -118,7 +118,7 @@ public class Assignment1 {
          System.out.println("Count edges: " + outputEdges.size());
          System.out.println("Output Points");
 
-         try (final BufferedWriter fout = new BufferedWriter(new FileWriter("output.txt"))) {
+         try (final BufferedWriter fout = new BufferedWriter(new FileWriter("output_" + algorithmType.name() + ".txt"))) {
             fout.write(output.size() + "\n");
 
             for (final Tuple2d value : output) {
