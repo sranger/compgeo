@@ -6,4 +6,4 @@ REM set ANT_HOME="/path/to/ant/bin"
 REM set JAVA_HOME="/path/to/java/bin"
 REM set PATH=%PATH%;%ANT_HOME%;%JAVA_HOME%
 
-java -Djava.net.useSystemProxies=true -Xmx2048m com.stephenwranger.compgeo.assignment1.Assignment1 BruteForce %1 %2
+java -Djava.net.useSystemProxies=true -Xmx2048m com.stephenwranger.compgeo.assignment1.Assignment1Benchmarks

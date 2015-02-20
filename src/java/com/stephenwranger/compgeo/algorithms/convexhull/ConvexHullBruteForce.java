@@ -24,6 +24,10 @@ public class ConvexHullBruteForce implements Algorithm<Tuple2d> {
       double cA, cB, cC, temp;
       boolean isValid;
       int currentSign;
+      double minX = Double.MAX_VALUE;
+      double maxX = -Double.MAX_VALUE;
+      double minY = Double.MAX_VALUE;
+      double maxY = -Double.MAX_VALUE;
 
       for (int i = 0; i < input.size(); i++) {
          for (int j = 0; j < input.size(); j++) {
@@ -67,6 +71,10 @@ public class ConvexHullBruteForce implements Algorithm<Tuple2d> {
                }
 
                if (isValid) {
+                  minX = Math.min(minX, vi.x);
+                  maxX = Math.max(maxX, vi.x);
+                  minY = Math.min(minY, vi.y);
+                  maxY = Math.max(maxY, vi.y);
                   outputSet.add(vi);
                   outputSet.add(vj);
                   outputEdgesSet.add(Pair.getInstance(vi, vj));
@@ -77,6 +85,8 @@ public class ConvexHullBruteForce implements Algorithm<Tuple2d> {
 
       output.addAll(outputSet);
       outputEdges.addAll(outputEdgesSet);
-      Collections.sort(output, AlgorithmUtils.getComparator());
+      final double centerX = (maxX - minX) / 2.0 + minX;
+      final double centerY = (maxY - minY) / 2.0 + minY;
+      Collections.sort(output, AlgorithmUtils.getComparator(new Tuple2d(centerX, centerY)));
    }
 }

@@ -7,7 +7,7 @@ JAVA_FLAGS='-Djava.net.useSystemProxies=true -Xmx2048m'
 
 ##
 # The main class
-MAIN='com.stephenwranger.compgeo.assignment1.Assignment1'
+MAIN='com.stephenwranger.compgeo.assignment1.Assignment1Benchmarks'
 
 EXTRA_CLASSPATH='';
 
@@ -36,5 +36,5 @@ export CLASSPATH
 #set PATH="$PATH:$ANT_HOME:$JAVA_HOME"
 #export PATH
 
-java ${JAVA_FLAGS} ${MAIN} BruteForce $@
+java ${JAVA_FLAGS} ${MAIN}
 
