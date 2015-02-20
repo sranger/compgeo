@@ -31,5 +31,10 @@ fi
 
 export CLASSPATH
 
+#set ANT_HOME="/path/to/ant/bin"
+#set JAVA_HOME="/path/to/java/bin"
+#set PATH="$PATH:$ANT_HOME:$JAVA_HOME"
+#export PATH
+
 java ${JAVA_FLAGS} ${MAIN} JarvisMarch $@
 

@@ -10,12 +10,12 @@ import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
 import com.stephenwranger.compgeo.algorithms.Algorithm;
+import com.stephenwranger.compgeo.algorithms.AlgorithmUtils;
 import com.stephenwranger.compgeo.algorithms.convexhull.ConvexHullBruteForce;
 import com.stephenwranger.compgeo.algorithms.convexhull.ConvexHullGrahamsScan;
 import com.stephenwranger.compgeo.algorithms.convexhull.ConvexHullJarvisMarch;
@@ -26,7 +26,7 @@ import com.stephenwranger.graphics.renderables.Graph;
 import com.stephenwranger.graphics.utils.TimeUtils;
 
 public class Assignment1 {
-   public static final String USAGE_STRING = "Usage: Assignment1 <algorighm> <filename>\nUsage: Assignment1 <algorighm> <point count>";
+   public static final String USAGE_STRING = "Usage: Assignment1 <algorighm> <filename>\nUsage: Assignment1 <algorighm> <point count> [--ui]";
 
    public enum ConvexHullAlgorithm {
       BruteForce, GrahamsScan, JarvisMarch
@@ -64,6 +64,8 @@ public class Assignment1 {
          System.err.println("Algorithm " + args[0] + " invalid; acceptable values are: " + Arrays.toString(ConvexHullAlgorithm.values()) + ".");
          throw new InvalidParameterException(Assignment1.USAGE_STRING);
       }
+      
+      final boolean showUi = (args.length >= 3 && args[2].equals("--ui"));
 
       Algorithm<Tuple2d> algorithm = null;
 
@@ -86,22 +88,20 @@ public class Assignment1 {
             try (final BufferedReader fin = new BufferedReader(new InputStreamReader(inputFile))) {
                pointCount = Integer.parseInt(fin.readLine());
                String[] values;
+               Tuple2d point;
 
                for (int i = 0; i < pointCount; i++) {
                   values = fin.readLine().split(" ");
-                  input.add(new Tuple2d(Integer.parseInt(values[0]), Integer.parseInt(values[1])));
+                  do {
+                     point = new Tuple2d(Integer.parseInt(values[0]), Integer.parseInt(values[1]));
+                  } while(input.contains(point));
+                  input.add(point);
                }
             } catch (final IOException e) {
                e.printStackTrace();
             }
          } else {
-            final int range = (int) Math.pow(10.0, Math.floor(Math.log10(pointCount)));
-            System.out.println("range: " + range);
-            final Random random = new Random();
-
-            for (int i = 0; i < pointCount; i++) {
-               input.add(new Tuple2d(random.nextInt(range), random.nextInt(range)));
-            }
+            AlgorithmUtils.getRandomPoints(pointCount, input);
          }
 
          final List<Tuple2d> output = new ArrayList<Tuple2d>();
@@ -118,7 +118,7 @@ public class Assignment1 {
          System.out.println("Count edges: " + outputEdges.size());
          System.out.println("Output Points");
 
-         try (final BufferedWriter fout = new BufferedWriter(new FileWriter("output_" + algorithmType.name() + ".txt"))) {
+         try (final BufferedWriter fout = new BufferedWriter(new FileWriter("output_" + algorithmType.name() + "_" + input.size() + ".txt"))) {
             fout.write(output.size() + "\n");
 
             for (final Tuple2d value : output) {
@@ -129,22 +129,24 @@ public class Assignment1 {
             e.printStackTrace();
          }
 
-         final JFrame frame = new JFrame("Computational Geometry: Assignment 1");
-         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-         final Scene2d scene2d = new Scene2d(1600, 1000);
-         scene2d.addRenderable2d(new Graph(input, outputEdges));
-
-         frame.getContentPane().add(scene2d);
-
-         SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-               frame.pack();
-               frame.setLocation(100, 100);
-               frame.setVisible(true);
-            }
-         });
+         if(showUi) {
+	         final JFrame frame = new JFrame("Computational Geometry: Assignment 1");
+	         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	
+	         final Scene2d scene2d = new Scene2d(1600, 1000);
+	         scene2d.addRenderable2d(new Graph(input, output));
+	
+	         frame.getContentPane().add(scene2d);
+	
+	         SwingUtilities.invokeLater(new Runnable() {
+	            @Override
+	            public void run() {
+	               frame.pack();
+	               frame.setLocation(100, 100);
+	               frame.setVisible(true);
+	            }
+	         });
+         }
       }
    }
 }
