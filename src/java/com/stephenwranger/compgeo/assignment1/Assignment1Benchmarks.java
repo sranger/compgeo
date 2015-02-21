@@ -51,8 +51,12 @@ public class Assignment1Benchmarks {
          }
          System.out.println("\nPoint Count: " + testSizes[i]);
          System.out.println("Runs: " + runCount);
-         System.out.println("Brute Force Average:  " + ((bfValid) ? TimeUtils.formatNanoseconds(Assignment1Benchmarks.average(bruteforceDurations)) : "Timed Out"));
-         System.out.println("Jarvis March Average: " + ((jmValid) ? TimeUtils.formatNanoseconds(Assignment1Benchmarks.average(jarvisDurations)) : "Timed Out"));
+         System.out.println("Brute Force Average:  "
+               + ((bfValid) ? TimeUtils.formatNanoseconds(Assignment1Benchmarks.average(bruteforceDurations)) + "("
+                     + Assignment1Benchmarks.average(bruteforceDurations) + " ns)" : "Timed Out"));
+         System.out.println("Jarvis March Average: "
+               + ((jmValid) ? TimeUtils.formatNanoseconds(Assignment1Benchmarks.average(jarvisDurations)) + "("
+                     + Assignment1Benchmarks.average(jarvisDurations) + " ns)" : "Timed Out"));
       }
    }
 
