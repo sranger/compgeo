@@ -20,7 +20,6 @@ import com.stephenwranger.compgeo.algorithms.convexhull.ConvexHullBruteForce;
 import com.stephenwranger.compgeo.algorithms.convexhull.ConvexHullGrahamsScan;
 import com.stephenwranger.compgeo.algorithms.convexhull.ConvexHullJarvisMarch;
 import com.stephenwranger.graphics.Scene2d;
-import com.stephenwranger.graphics.collections.Pair;
 import com.stephenwranger.graphics.math.Tuple2d;
 import com.stephenwranger.graphics.renderables.Graph;
 import com.stephenwranger.graphics.utils.TimeUtils;
@@ -64,7 +63,7 @@ public class Assignment1 {
          System.err.println("Algorithm " + args[0] + " invalid; acceptable values are: " + Arrays.toString(ConvexHullAlgorithm.values()) + ".");
          throw new InvalidParameterException(Assignment1.USAGE_STRING);
       }
-      
+
       final boolean showUi = (args.length >= 3 && args[2].equals("--ui"));
 
       Algorithm<Tuple2d> algorithm = null;
@@ -105,17 +104,14 @@ public class Assignment1 {
          }
 
          final List<Tuple2d> output = new ArrayList<Tuple2d>();
-         final List<Pair<Tuple2d, Tuple2d>> outputEdges = new ArrayList<>();
-
          final long startTime = System.nanoTime();
-         algorithm.compute(input, output, outputEdges);
+         algorithm.compute(input, output);
          final long endTime = System.nanoTime();
          final long duration = endTime - startTime;
 
          System.out.println("Complete");
          System.out.println("Duration: " + TimeUtils.formatNanoseconds(duration) + " (" + duration + "ns)");
          System.out.println("Count points: " + output.size());
-         System.out.println("Count edges: " + outputEdges.size());
          System.out.println("Output Points");
 
          try (final BufferedWriter fout = new BufferedWriter(new FileWriter("output_" + algorithmType.name() + "_" + input.size() + ".txt"))) {
@@ -130,22 +126,22 @@ public class Assignment1 {
          }
 
          if(showUi) {
-	         final JFrame frame = new JFrame("Computational Geometry: Assignment 1");
-	         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	
-	         final Scene2d scene2d = new Scene2d(1600, 1000);
-	         scene2d.addRenderable2d(new Graph(input, output));
-	
-	         frame.getContentPane().add(scene2d);
-	
-	         SwingUtilities.invokeLater(new Runnable() {
-	            @Override
-	            public void run() {
-	               frame.pack();
-	               frame.setLocation(100, 100);
-	               frame.setVisible(true);
-	            }
-	         });
+            final JFrame frame = new JFrame("Computational Geometry: Assignment 1");
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+            final Scene2d scene2d = new Scene2d(1600, 1000);
+            scene2d.addRenderable2d(new Graph(input, output));
+
+            frame.getContentPane().add(scene2d);
+
+            SwingUtilities.invokeLater(new Runnable() {
+               @Override
+               public void run() {
+                  frame.pack();
+                  frame.setLocation(100, 100);
+                  frame.setVisible(true);
+               }
+            });
          }
       }
    }

@@ -1,12 +1,11 @@
 package com.stephenwranger.compgeo.algorithms.convexhull;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import com.stephenwranger.compgeo.algorithms.Algorithm;
 import com.stephenwranger.compgeo.algorithms.AlgorithmUtils;
-import com.stephenwranger.graphics.collections.Pair;
 import com.stephenwranger.graphics.math.Tuple2d;
 
 public class ConvexHullJarvisMarch implements Algorithm<Tuple2d> {
@@ -15,9 +14,7 @@ public class ConvexHullJarvisMarch implements Algorithm<Tuple2d> {
    }
 
    @Override
-   public void compute(final List<Tuple2d> input, final List<Tuple2d> output, final List<Pair<Tuple2d, Tuple2d>> outputEdges) {
-      final int count = input.size();
-      final List<Integer> result = new ArrayList<Integer>();
+   public void compute(final List<Tuple2d> input, final List<Tuple2d> output) {
       double minX = Double.MAX_VALUE;
       double maxX = -Double.MAX_VALUE;
       double minY = Double.MAX_VALUE;
@@ -26,37 +23,50 @@ public class ConvexHullJarvisMarch implements Algorithm<Tuple2d> {
       int lowest = 0;
 
       for (int i = 1; i < input.size(); i++) {
-         if (input.get(i).x < input.get(lowest).x) {// && input.get(i).y < input.get(lowest).y) {
+         if (input.get(i).x < input.get(lowest).x) {
+            lowest = i;
+         } else if (input.get(i).x == input.get(lowest).x && input.get(i).y < input.get(lowest).y) {
             lowest = i;
          }
       }
 
-      int p = lowest;
-      int q;
+      final int[] next = new int[input.size()];
+      Arrays.fill(next, -1);
 
-      do {
-         q = (p + 1) % count;
+      int i = 0;
+      next[0] = lowest;
 
-         for (int i = 0; i < count; i++) {
-            if (ConvexHullJarvisMarch.isCounterClockwise(input.get(p), input.get(i), input.get(q))) {
-               q = i;
+      try {
+         do {
+            next[i + 1] = ConvexHullJarvisMarch.nextPoint(input, next[i]);
+            i++;
+         } while (next[i] != next[0]);
+      } catch (final Exception e) {
+         e.printStackTrace();
+         for (final int index : next) {
+            if (index != -1) {
+               System.err.println(index + ", " + input.get(index));
             }
          }
 
-         result.add(q);
-         p = q;
-      } while (p != lowest);
+         for (final Tuple2d t : input) {
+            System.err.println(t);
+         }
+
+         System.exit(1);
+      }
 
       Tuple2d point;
 
-      for (int i = 0; i < result.size(); i++) {
-         point = input.get(result.get(i));
-         minX = Math.min(minX, point.x);
-         maxX = Math.max(maxX, point.x);
-         minY = Math.min(minY, point.y);
-         maxY = Math.max(maxY, point.y);
-         output.add(input.get(result.get(i)));
-         outputEdges.add(Pair.getInstance(input.get(result.get((i - 1 + result.size()) % result.size())), input.get(result.get(i))));
+      for (final int index : next) {
+         if (index != -1) {
+            point = input.get(index);
+            minX = Math.min(minX, point.x);
+            maxX = Math.max(maxX, point.x);
+            minY = Math.min(minY, point.y);
+            maxY = Math.max(maxY, point.y);
+            output.add(input.get(index));
+         }
       }
 
       final double centerX = (maxX - minX) / 2.0 + minX;
@@ -64,10 +74,43 @@ public class ConvexHullJarvisMarch implements Algorithm<Tuple2d> {
       Collections.sort(output, AlgorithmUtils.getComparator(new Tuple2d(centerX, centerY)));
    }
 
-   public static boolean isCounterClockwise(final Tuple2d p, final Tuple2d q, final Tuple2d r) {
-      // return ((p1.y - p0.y) * (p2.x - p1.x) - (p1.x - p0.x) * (p2.y - p1.y)) < 0;
-      double val = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
+   public static int nextPoint(final List<Tuple2d> input, final int p) {
+      int q = p;
+      int turn;
 
-      return (val < 0); // true if counterclock wise
+      for (int r = 0; r < input.size(); r++) {
+         if (r != q) {
+            turn = ConvexHullJarvisMarch.turn(input.get(p), input.get(r), input.get(q));
+
+            if (turn == -1 || (turn == 0 && ConvexHullJarvisMarch.dist(input, p, r) > ConvexHullJarvisMarch.dist(input, p, q))) {
+               q = r;
+            }
+         }
+      }
+
+      return q;
+   }
+
+   public static double dist(final List<Tuple2d> input, final int index1, final int index2) {
+      final Tuple2d t1 = input.get(index1);
+      final Tuple2d t2 = input.get(index2);
+      return ConvexHullJarvisMarch.dist(t1, t2);
+   }
+
+   public static double dist(final Tuple2d t1, final Tuple2d t2) {
+      return t1.distanceSquared(t2);
+   }
+
+   /**
+    * Returns -1,0,1 for ccw,no,cw turns.
+    *
+    * @param p
+    * @param q
+    * @param r
+    * @return
+    */
+   public static int turn(final Tuple2d p, final Tuple2d q, final Tuple2d r) {
+      final double val = ((q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y)) + 0;
+      return (val == 0) ? 0 : (val < 0) ? -1 : 1;
    }
 }
