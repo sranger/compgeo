@@ -105,7 +105,7 @@ public class Assignment1 {
 
          final List<Tuple2d> output = new ArrayList<Tuple2d>();
          final long startTime = System.nanoTime();
-         algorithm.compute(input, output);
+         algorithm.compute(input, output, 5 * 60 * 1000);
          final long endTime = System.nanoTime();
          final long duration = endTime - startTime;
 

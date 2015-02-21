@@ -11,7 +11,7 @@ public class ConvexHullGrahamsScan implements Algorithm<Tuple2d> {
    }
 
    @Override
-   public void compute(final List<Tuple2d> input, final List<Tuple2d> output) {
-
+   public boolean compute(final List<Tuple2d> input, final List<Tuple2d> output, final long timeout) {
+      return false;
    }
 }
