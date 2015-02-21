@@ -16,7 +16,7 @@ To Run:
 	
    run_assignment1_benchmark.(bat/sh)
    
-   - will run each algorithm 1000 times for each of the following point input counts
+   - will run each algorithm 10 times for each of the following point input counts
       [10,100,1000,10000,100000]
    - an algorithm will be skipped entirely if any of the attempts runs past five minutes
    - no output files will be created as with the individual tests; this is for performance only
