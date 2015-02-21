@@ -11,13 +11,18 @@ public class AlgorithmUtils {
    private AlgorithmUtils() {
       // statics only
    }
-   
+
    public static void getRandomPoints(final int pointCount, final List<Tuple2d> output) {
       final int range = (int) Math.pow(10.0, Math.floor(Math.log10(pointCount)));
       final Random random = new Random();
+      Tuple2d point;
 
       for (int i = 0; i < pointCount; i++) {
-         output.add(new Tuple2d(random.nextInt(range), random.nextInt(range)));
+         do {
+            point = new Tuple2d(random.nextInt(range), random.nextInt(range));
+         } while (output.contains(point));
+
+         output.add(point);
       }
    }
 
@@ -35,11 +40,11 @@ public class AlgorithmUtils {
             if(angle0 < 0) {
                angle0 = Math.PI + (Math.PI - Math.abs(angle0));
             }
-            
+
             if(angle1 < 0) {
                angle1 = Math.PI + (Math.PI - Math.abs(angle1));
             }
-            
+
             return (angle0 > angle1) ? -1 : (angle0 == angle1) ? 0 : 1;
          }
       };

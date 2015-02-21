@@ -14,8 +14,8 @@ Export-Package: com.stephenwranger.graphics,
  com.stephenwranger.graphics.utils,
  com.stephenwranger.graphics.utils.buffers,
  com.stephenwranger.graphics.utils.textures,
- java.com.stephenwranger.compgeo.algorithms,
- java.com.stephenwranger.compgeo.algorithms.convexhull,
- java.com.stephenwranger.compgeo.assignment1
+ com.stephenwranger.compgeo.algorithms,
+ com.stephenwranger.compgeo.algorithms.convexhull,
+ com.stephenwranger.compgeo.assignment1
 Bundle-Vendor: com.stephenwranger
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8

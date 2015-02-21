@@ -7,7 +7,6 @@ import java.util.Set;
 
 import com.stephenwranger.compgeo.algorithms.Algorithm;
 import com.stephenwranger.compgeo.algorithms.AlgorithmUtils;
-import com.stephenwranger.graphics.collections.Pair;
 import com.stephenwranger.graphics.math.Tuple2d;
 
 public class ConvexHullBruteForce implements Algorithm<Tuple2d> {
@@ -17,9 +16,8 @@ public class ConvexHullBruteForce implements Algorithm<Tuple2d> {
    }
 
    @Override
-   public void compute(final List<Tuple2d> input, final List<Tuple2d> output, final List<Pair<Tuple2d, Tuple2d>> outputEdges) {
+   public void compute(final List<Tuple2d> input, final List<Tuple2d> output) {
       final Set<Tuple2d> outputSet = new HashSet<Tuple2d>();
-      final Set<Pair<Tuple2d, Tuple2d>> outputEdgesSet = new HashSet<Pair<Tuple2d, Tuple2d>>();
       Tuple2d vi, vj, vk;
       double cA, cB, cC, temp;
       boolean isValid;
@@ -77,14 +75,12 @@ public class ConvexHullBruteForce implements Algorithm<Tuple2d> {
                   maxY = Math.max(maxY, vi.y);
                   outputSet.add(vi);
                   outputSet.add(vj);
-                  outputEdgesSet.add(Pair.getInstance(vi, vj));
                }
             }
          }
       }
 
       output.addAll(outputSet);
-      outputEdges.addAll(outputEdgesSet);
       final double centerX = (maxX - minX) / 2.0 + minX;
       final double centerY = (maxY - minY) / 2.0 + minY;
       Collections.sort(output, AlgorithmUtils.getComparator(new Tuple2d(centerX, centerY)));
