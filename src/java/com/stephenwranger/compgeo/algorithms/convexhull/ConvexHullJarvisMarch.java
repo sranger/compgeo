@@ -14,11 +14,13 @@ public class ConvexHullJarvisMarch implements Algorithm<Tuple2d> {
    }
 
    @Override
-   public void compute(final List<Tuple2d> input, final List<Tuple2d> output) {
+   public boolean compute(final List<Tuple2d> input, final List<Tuple2d> output, final long timeout) {
       double minX = Double.MAX_VALUE;
       double maxX = -Double.MAX_VALUE;
       double minY = Double.MAX_VALUE;
       double maxY = -Double.MAX_VALUE;
+
+      final long startTime = System.nanoTime();
 
       int lowest = 0;
 
@@ -38,6 +40,10 @@ public class ConvexHullJarvisMarch implements Algorithm<Tuple2d> {
 
       try {
          do {
+            if ((System.nanoTime() - startTime) / 1000000l > timeout) {
+               return false;
+            }
+
             next[i + 1] = ConvexHullJarvisMarch.nextPoint(input, next[i]);
             i++;
          } while (next[i] != next[0]);
@@ -53,7 +59,7 @@ public class ConvexHullJarvisMarch implements Algorithm<Tuple2d> {
             System.err.println(t);
          }
 
-         System.exit(1);
+         return false;
       }
 
       Tuple2d point;
@@ -72,6 +78,8 @@ public class ConvexHullJarvisMarch implements Algorithm<Tuple2d> {
       final double centerX = (maxX - minX) / 2.0 + minX;
       final double centerY = (maxY - minY) / 2.0 + minY;
       Collections.sort(output, AlgorithmUtils.getComparator(new Tuple2d(centerX, centerY)));
+
+      return true;
    }
 
    public static int nextPoint(final List<Tuple2d> input, final int p) {

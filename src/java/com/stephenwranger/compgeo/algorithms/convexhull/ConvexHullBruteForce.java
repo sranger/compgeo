@@ -16,7 +16,7 @@ public class ConvexHullBruteForce implements Algorithm<Tuple2d> {
    }
 
    @Override
-   public void compute(final List<Tuple2d> input, final List<Tuple2d> output) {
+   public boolean compute(final List<Tuple2d> input, final List<Tuple2d> output, final long timeout) {
       final Set<Tuple2d> outputSet = new HashSet<Tuple2d>();
       Tuple2d vi, vj, vk;
       double cA, cB, cC, temp;
@@ -27,8 +27,13 @@ public class ConvexHullBruteForce implements Algorithm<Tuple2d> {
       double minY = Double.MAX_VALUE;
       double maxY = -Double.MAX_VALUE;
 
+      final long startTime = System.nanoTime();
+
       for (int i = 0; i < input.size(); i++) {
          for (int j = 0; j < input.size(); j++) {
+            if ((System.nanoTime() - startTime) / 1000000l > timeout) {
+               return false;
+            }
             vi = input.get(i);
             vj = input.get(j);
 
@@ -44,7 +49,7 @@ public class ConvexHullBruteForce implements Algorithm<Tuple2d> {
                 * check if all other points lie on the same side of the line (xi,yi) and (xj,yj) i.e solving axk+byk-c=0 => xk(yi-yj)+(xi-xj)yk-xiyi+yixj=0
                 * gives you either 0 or a positive number or a negative number add (xi,yi) to (xj,yj) to the list/vector of extreme points
                 */
-               for(int k = 0; k < input.size(); k++) {
+               for (int k = 0; k < input.size(); k++) {
                   vk = input.get(k);
 
                   if ((vk != vi) && !vk.equals(vi) && (vk != vj) && !vk.equals(vj)) {
@@ -84,5 +89,7 @@ public class ConvexHullBruteForce implements Algorithm<Tuple2d> {
       final double centerX = (maxX - minX) / 2.0 + minX;
       final double centerY = (maxY - minY) / 2.0 + minY;
       Collections.sort(output, AlgorithmUtils.getComparator(new Tuple2d(centerX, centerY)));
+
+      return true;
    }
 }
