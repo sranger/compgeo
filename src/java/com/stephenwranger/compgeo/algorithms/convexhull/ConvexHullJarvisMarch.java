@@ -8,7 +8,7 @@ import com.stephenwranger.compgeo.algorithms.Algorithm;
 import com.stephenwranger.compgeo.algorithms.AlgorithmUtils;
 import com.stephenwranger.graphics.math.Tuple2d;
 
-public class ConvexHullJarvisMarch implements Algorithm<Tuple2d> {
+public class ConvexHullJarvisMarch implements Algorithm<Tuple2d, Tuple2d> {
    public ConvexHullJarvisMarch() {
       // nothing
    }
@@ -75,7 +75,7 @@ public class ConvexHullJarvisMarch implements Algorithm<Tuple2d> {
 
       final double centerX = (maxX - minX) / 2.0 + minX;
       final double centerY = (maxY - minY) / 2.0 + minY;
-      Collections.sort(output, AlgorithmUtils.getComparator(new Tuple2d(centerX, centerY)));
+      Collections.sort(output, AlgorithmUtils.getAngleComparator(new Tuple2d(centerX, centerY)));
 
       return true;
    }

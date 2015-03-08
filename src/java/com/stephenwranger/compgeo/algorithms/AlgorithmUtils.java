@@ -6,6 +6,7 @@ import java.util.Random;
 
 import com.stephenwranger.graphics.math.Tuple2d;
 import com.stephenwranger.graphics.math.Vector2d;
+import com.stephenwranger.graphics.renderables.LineSegment;
 
 public class AlgorithmUtils {
    private AlgorithmUtils() {
@@ -19,14 +20,38 @@ public class AlgorithmUtils {
 
       for (int i = 0; i < pointCount; i++) {
          do {
-            point = new Tuple2d(random.nextInt(range), random.nextInt(range));
+            point = new Tuple2d(random.nextDouble() * range, random.nextDouble() * range);
          } while (output.contains(point));
 
          output.add(point);
       }
    }
 
-   public static Comparator<Tuple2d> getComparator(final Tuple2d origin) {
+   public static void getRandomSegments(final int segmentCount, final List<LineSegment> output) {
+      final int range = (int) Math.pow(10.0, Math.floor(Math.log10(segmentCount)));
+      final Random random = new Random();
+      Tuple2d p1, p2;
+
+      for (int i = 0; i < segmentCount; i++) {
+         do {
+            p1 = new Tuple2d(random.nextDouble() * range, random.nextDouble() * range);
+            p2 = new Tuple2d(random.nextDouble() * range, random.nextDouble() * range);
+         } while (p1.x == p2.x);
+
+         output.add(new LineSegment(p1, p2));
+      }
+   }
+
+   public static Comparator<Tuple2d> getXAxisComparator() {
+      return new Comparator<Tuple2d>() {
+         @Override
+         public int compare(final Tuple2d o1, final Tuple2d o2) {
+            return o1.x < o2.x ? -1 : o1.x == o2.x ? 0 : 1;
+         }
+      };
+   }
+
+   public static Comparator<Tuple2d> getAngleComparator(final Tuple2d origin) {
       final Vector2d up = new Vector2d(0,1);
 
       return new Comparator<Tuple2d>() {

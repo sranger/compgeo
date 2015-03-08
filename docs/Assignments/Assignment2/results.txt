@@ -1,0 +1,47 @@
+Resources:  http://www.lems.brown.edu/~wq/projects/cs252.html
+            http://stackoverflow.com/questions/16314069/calculation-of-intersections-between-line-segments
+            
+            
+Results:
+
+Point Count: 10
+Runs: 10
+Brute Force Average:  149탎 162ns(149162 ns)
+Line Sweep Average: 353탎 893ns(353893 ns)
+
+Point Count: 100
+Runs: 10
+Brute Force Average:  1ms 189탎(1189117 ns)
+Line Sweep Average: 3ms 210탎(3210143 ns)
+
+Point Count: 1000
+Runs: 10
+Brute Force Average:  27ms 363탎(27363714 ns)
+Line Sweep Average: 38ms 388탎(38388896 ns)
+
+Point Count: 10000
+Runs: 10
+Brute Force Average:  5s 79ms(5079318176 ns)
+Line Sweep Average: 2s 828ms(2828113946 ns)
+
+
+
+Point Count: 10
+Runs: 10000
+Brute Force Average:  3탎 697ns(3697 ns)
+Line Sweep Average: 3탎 751ns(3751 ns)
+
+Point Count: 100
+Runs: 10000
+Brute Force Average:  237탎 203ns(237203 ns)
+Line Sweep Average: 16탎 857ns(16857 ns)
+
+Point Count: 1000
+Runs: 10000
+Brute Force Average:  23ms 395탎(23395537 ns)
+Line Sweep Average: 179탎 232ns(179232 ns)
+
+Point Count: 10000
+Runs: 10000
+Brute Force Average:  3s 573ms(3573792914 ns)
+Line Sweep Average: 4ms 14탎(4014712 ns)

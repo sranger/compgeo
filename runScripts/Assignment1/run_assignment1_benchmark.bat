@@ -1,5 +1,5 @@
 @ECHO OFF
-set CLASSPATH=%CLASSPATH%;./lib/com.stephenwranger.graphics.jar;./dist/com.stephenwranger.compgeo.jar
+set CLASSPATH=%CLASSPATH%;../../lib/com.stephenwranger.graphics.jar;../../dist/com.stephenwranger.compgeo.jar
 
 
 REM set ANT_HOME="/path/to/ant/bin"
