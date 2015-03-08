@@ -5,7 +5,7 @@ import java.util.List;
 import com.stephenwranger.compgeo.algorithms.Algorithm;
 import com.stephenwranger.graphics.math.Tuple2d;
 
-public class ConvexHullGrahamsScan implements Algorithm<Tuple2d> {
+public class ConvexHullGrahamsScan implements Algorithm<Tuple2d, Tuple2d> {
    public ConvexHullGrahamsScan() {
       // nothing
    }

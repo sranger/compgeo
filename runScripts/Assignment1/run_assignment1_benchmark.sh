@@ -7,16 +7,16 @@ JAVA_FLAGS='-Djava.net.useSystemProxies=true -Xmx2048m'
 
 ##
 # The main class
-MAIN='com.stephenwranger.compgeo.assignment1.Assignment1'
+MAIN='com.stephenwranger.compgeo.assignment1.Assignment1Benchmarks'
 
 EXTRA_CLASSPATH='';
 
-for JAR in $( find ./lib -name '*.jar' )
+for JAR in $( find ../../lib -name '*.jar' )
 do
   EXTRA_CLASSPATH=$EXTRA_CLASSPATH:$JAR
 done
 
-for JAR in $( find ./dist -name '*.jar' )
+for JAR in $( find ../../dist -name '*.jar' )
 do
   EXTRA_CLASSPATH=$EXTRA_CLASSPATH:$JAR
 done
@@ -36,5 +36,5 @@ export CLASSPATH
 #set PATH="$PATH:$ANT_HOME:$JAVA_HOME"
 #export PATH
 
-java ${JAVA_FLAGS} ${MAIN} BruteForce $@
+java ${JAVA_FLAGS} ${MAIN}
 

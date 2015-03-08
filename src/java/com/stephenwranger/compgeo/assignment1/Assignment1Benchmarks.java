@@ -12,7 +12,7 @@ import com.stephenwranger.graphics.utils.TimeUtils;
 
 public class Assignment1Benchmarks {
 
-   public static void main(String[] args) {
+   public static void main(final String[] args) {
       final List<Tuple2d> input = new ArrayList<Tuple2d>();
       final int[] testSizes = new int[] { 10, 100, 1000, 10000, 100000 };
       final int runCount = 10;
@@ -60,7 +60,7 @@ public class Assignment1Benchmarks {
       }
    }
 
-   private static long run(final Algorithm<Tuple2d> algorithm, final List<Tuple2d> input, final List<Tuple2d> output) {
+   private static long run(final Algorithm<Tuple2d, Tuple2d> algorithm, final List<Tuple2d> input, final List<Tuple2d> output) {
       output.clear();
 
       final long startTime = System.nanoTime();

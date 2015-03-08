@@ -3,20 +3,20 @@
 
 ##
 # Java VM flags
-JAVA_FLAGS='-Djava.net.useSystemProxies=true -Xmx2048m'
+JAVA_FLAGS='-Djava.net.useSystemProxies=true -XX:MaxPermSize=256m -Xmx4096m'
 
 ##
 # The main class
-MAIN='com.stephenwranger.compgeo.assignment1.Assignment1'
+MAIN='com.stephenwranger.compgeo.assignment2.Assignment2Benchmarks'
 
 EXTRA_CLASSPATH='';
 
-for JAR in $( find ./lib -name '*.jar' )
+for JAR in $( find ../../lib -name '*.jar' )
 do
   EXTRA_CLASSPATH=$EXTRA_CLASSPATH:$JAR
 done
 
-for JAR in $( find ./dist -name '*.jar' )
+for JAR in $( find ../../dist -name '*.jar' )
 do
   EXTRA_CLASSPATH=$EXTRA_CLASSPATH:$JAR
 done
@@ -36,5 +36,5 @@ export CLASSPATH
 #set PATH="$PATH:$ANT_HOME:$JAVA_HOME"
 #export PATH
 
-java ${JAVA_FLAGS} ${MAIN} JarvisMarch $@
+java ${JAVA_FLAGS} ${MAIN}
 
