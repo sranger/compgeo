@@ -90,7 +90,7 @@ public class Assignment2Benchmarks {
                }
             }
 
-            runs.setValue(j);
+            runs.setValue(j + 1);
             runs.setString(((j + 1) / runCount * 100.0) + "%");
          }
          System.out.println("\nPoint Count: " + testSizes[i]);
@@ -98,11 +98,11 @@ public class Assignment2Benchmarks {
          System.out.println("Brute Force Average:  "
                + ((bfValid) ? TimeUtils.formatNanoseconds(Assignment2Benchmarks.average(bruteforceDurations)) + "("
                      + Assignment2Benchmarks.average(bruteforceDurations) + " ns)" : "Timed Out"));
-         System.out.println("Line Sweep Average: "
+         System.out.println("Line Sweep Average:   "
                + ((lsValid) ? TimeUtils.formatNanoseconds(Assignment2Benchmarks.average(lineSweepDurations)) + "("
                      + Assignment2Benchmarks.average(lineSweepDurations) + " ns)" : "Timed Out"));
 
-         tests.setValue(i);
+         tests.setValue(i + 1);
          tests.setString((((i + 1) / testSizes.length) * 100.0) + "%");
       }
    }

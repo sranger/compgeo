@@ -24,6 +24,11 @@ Runs: 10
 Brute Force Average:  5s 79ms(5079318176 ns)
 Line Sweep Average: 2s 828ms(2828113946 ns)
 
+Point Count: 100000
+Runs: 10
+Brute Force Average:  Timed Out
+Line Sweep Average: Timed Out (this one due to creating events at start)
+
 
 
 Point Count: 10
