@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.stephenwranger.compgeo.algorithms.Algorithm;
 import com.stephenwranger.graphics.math.Tuple2d;
-import com.stephenwranger.graphics.renderables.LineSegment;
+import com.stephenwranger.graphics.math.intersection.LineSegment;
 
 public class BruteForceSegmentIntersectionAlgorithm implements Algorithm<LineSegment, Tuple2d> {
 

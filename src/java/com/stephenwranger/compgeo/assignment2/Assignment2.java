@@ -23,8 +23,8 @@ import com.stephenwranger.compgeo.algorithms.segments.BruteForceSegmentIntersect
 import com.stephenwranger.compgeo.algorithms.segments.LineSweepSegmentIntersectionAlgorithm;
 import com.stephenwranger.graphics.Scene2d;
 import com.stephenwranger.graphics.math.Tuple2d;
+import com.stephenwranger.graphics.math.intersection.LineSegment;
 import com.stephenwranger.graphics.renderables.Graph;
-import com.stephenwranger.graphics.renderables.LineSegment;
 import com.stephenwranger.graphics.utils.TimeUtils;
 
 public class Assignment2 {

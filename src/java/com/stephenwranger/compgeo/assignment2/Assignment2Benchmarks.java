@@ -14,7 +14,7 @@ import com.stephenwranger.compgeo.algorithms.AlgorithmUtils;
 import com.stephenwranger.compgeo.algorithms.segments.BruteForceSegmentIntersectionAlgorithm;
 import com.stephenwranger.compgeo.algorithms.segments.LineSweepSegmentIntersectionAlgorithm;
 import com.stephenwranger.graphics.math.Tuple2d;
-import com.stephenwranger.graphics.renderables.LineSegment;
+import com.stephenwranger.graphics.math.intersection.LineSegment;
 import com.stephenwranger.graphics.utils.TimeUtils;
 
 public class Assignment2Benchmarks {

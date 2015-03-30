@@ -6,7 +6,7 @@ import java.util.Random;
 
 import com.stephenwranger.graphics.math.Tuple2d;
 import com.stephenwranger.graphics.math.Vector2d;
-import com.stephenwranger.graphics.renderables.LineSegment;
+import com.stephenwranger.graphics.math.intersection.LineSegment;
 
 public class AlgorithmUtils {
    private AlgorithmUtils() {

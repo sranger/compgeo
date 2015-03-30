@@ -9,7 +9,7 @@ import java.util.List;
 import com.stephenwranger.compgeo.algorithms.Algorithm;
 import com.stephenwranger.compgeo.algorithms.segments.SegmentEvent.EventType;
 import com.stephenwranger.graphics.math.Tuple2d;
-import com.stephenwranger.graphics.renderables.LineSegment;
+import com.stephenwranger.graphics.math.intersection.LineSegment;
 
 public class LineSweepSegmentIntersectionAlgorithm implements Algorithm<LineSegment, Tuple2d> {
 
