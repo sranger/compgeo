@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.stephenwranger.graphics.math.Tuple2d;
-import com.stephenwranger.graphics.renderables.LineSegment;
+import com.stephenwranger.graphics.math.intersection.LineSegment;
 
 public class SegmentEvent {
    public enum EventType {
