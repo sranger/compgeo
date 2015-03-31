@@ -27,6 +27,30 @@ public class TrapezoidalMapAlgorithm implements Algorithm<LineSegment, String[]>
       this.bounds = bounds;
    }
 
+   public void printQuery(final Tuple2d queryPoint) {
+      this.printQuery(this.root, queryPoint);
+   }
+
+   private void printQuery(final TrapezoidalMapNode n, final Tuple2d queryPoint) {
+      System.out.print(n.getLabel() + " ");
+
+      if (n instanceof XNode) {
+         final XNode node = (XNode) n;
+         if (IntersectionUtils.isLessOrEqual(queryPoint.x, node.segmentEndpoint.x)) {
+            this.printQuery(node.getLeftAbove(), queryPoint);
+         } else {
+            this.printQuery(node.getRightBelow(), queryPoint);
+         }
+      } else if (n instanceof YNode) {
+         final YNode node = (YNode) n;
+         if (IntersectionUtils.isGreaterThan(queryPoint.y, node.segment.a * queryPoint.x + node.segment.b)) {
+            this.printQuery(node.getLeftAbove(), queryPoint);
+         } else {
+            this.printQuery(node.getRightBelow(), queryPoint);
+         }
+      }
+   }
+
    @Override
    public boolean compute(final List<LineSegment> input, final List<String[]> output, final long timeout) {
       this.output = output;

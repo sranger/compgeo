@@ -10,7 +10,10 @@ To Run:
 	cd runScripts/Assignment3
 	run_assignment3.(bat/sh) <input_file>
 	
-NOTES:
+Once computation is complete; the application will allow the user to insert matrix queries as 
+x and y values separated by a space. The path through the graph will be printed for the user.
+	
+NOTES: (UPDATE)
 
 I had a tough time getting the node merging to work correctly. The assignment builds and runs but 
 crashes with attempting to insert the third line segment. I believe it has something to do with

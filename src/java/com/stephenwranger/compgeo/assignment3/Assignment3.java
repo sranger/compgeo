@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,11 +34,15 @@ public class Assignment3 {
          System.exit(1);
       }
 
+      final List<LineSegment> segments = new ArrayList<LineSegment>();
+      Rectangle2D bounds = null;
+      int numberOfSegments = 0;
+
       try (final BufferedReader fin = new BufferedReader(new FileReader(file));) {
-         final int numberOfSegments = Integer.parseInt(fin.readLine());
+         numberOfSegments = Integer.parseInt(fin.readLine());
          final String[] boundValues = fin.readLine().split(" ");
-         final Rectangle2D bounds = new Rectangle(Integer.parseInt(boundValues[0]), Integer.parseInt(boundValues[1]), Integer.parseInt(boundValues[2]), Integer.parseInt(boundValues[3]));
-         final List<LineSegment> segments = new ArrayList<LineSegment>();
+         bounds = new Rectangle(Integer.parseInt(boundValues[0]), Integer.parseInt(boundValues[1]), Integer.parseInt(boundValues[2]),
+               Integer.parseInt(boundValues[3]));
          String[] segment;
          Tuple2d v1, v2;
 
@@ -47,40 +52,67 @@ public class Assignment3 {
             v2 = new Tuple2d(Integer.parseInt(segment[2]), Integer.parseInt(segment[3]));
             segments.add(new LineSegment(v1, v2));
          }
+      } catch (final IOException e) {
+         e.printStackTrace();
+         return;
+      }
 
-         System.out.println("numberOfSegments: " + numberOfSegments);
-         System.out.println("bounds: " + bounds);
-         System.out.println("segments");
-         for (final LineSegment s : segments) {
-            System.out.println("\t" + s);
-         }
+      System.out.println("numberOfSegments: " + numberOfSegments);
+      System.out.println("bounds: " + bounds);
+      System.out.println("segments");
+      for (final LineSegment s : segments) {
+         System.out.println("\t" + s);
+      }
 
-         final List<String[]> output = new ArrayList<String[]>();
-         final TrapezoidalMapAlgorithm algorithm = new TrapezoidalMapAlgorithm(bounds);
-         final long startTime = System.nanoTime();
+      final List<String[]> output = new ArrayList<String[]>();
+      final TrapezoidalMapAlgorithm algorithm = new TrapezoidalMapAlgorithm(bounds);
+      final long startTime = System.nanoTime();
 
-         algorithm.compute(segments, output, 5 * 60 * 1000);
-         final long endTime = System.nanoTime();
-         final long duration = endTime - startTime;
+      algorithm.compute(segments, output, 5 * 60 * 1000);
+      final long endTime = System.nanoTime();
+      final long duration = endTime - startTime;
 
-         System.out.println("Complete");
-         System.out.println("Duration: " + TimeUtils.formatNanoseconds(duration) + " (" + duration + "ns)");
+      System.out.println("Complete");
+      System.out.println("Duration: " + TimeUtils.formatNanoseconds(duration) + " (" + duration + "ns)");
 
-         final File outfile = new File("assignment3.csv");
-         file.delete();
+      final File outfile = new File("assignment3.csv");
 
-         try (final BufferedWriter fout = new BufferedWriter(new FileWriter(outfile))) {
-            for(final String[] row : output) {
-               for (int j = 0; j < row.length; j++) {
-                  fout.write(row[j]);
+      try (final BufferedWriter fout = new BufferedWriter(new FileWriter(outfile))) {
+         for(final String[] row : output) {
+            for (int j = 0; j < row.length; j++) {
+               fout.write(row[j]);
 
-                  if (j < row.length - 1) {
-                     fout.write(",");
-                  }
+               if (j < row.length - 1) {
+                  fout.write(",");
                }
-
-               fout.write("\n");
             }
+
+            fout.write("\n");
+         }
+      } catch (final IOException e) {
+         e.printStackTrace();
+      }
+
+      try (final BufferedReader fin = new BufferedReader(new InputStreamReader(System.in))) {
+         String[] split;
+         double x = -1, y = -1;
+
+         while(true) {
+            System.out.print("\nInput Point Query (x y): ");
+            split = fin.readLine().split(" ");
+
+            if(split.length != 2) {
+               System.err.println("Invalid input, please enter only x and y values separated with a space then press enter to submit request.");
+            }
+
+            try {
+               x = Double.parseDouble(split[0]);
+               y = Double.parseDouble(split[1]);
+            } catch (final Exception e) {
+               System.err.println("Only numeric values accepted.");
+            }
+
+            algorithm.printQuery(new Tuple2d(x, y));
          }
       } catch (final IOException e) {
          e.printStackTrace();
