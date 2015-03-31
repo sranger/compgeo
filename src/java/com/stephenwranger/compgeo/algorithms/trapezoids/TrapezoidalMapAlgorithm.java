@@ -409,6 +409,8 @@ public class TrapezoidalMapAlgorithm implements Algorithm<LineSegment, String[]>
     * Updates the trapezoidal map matrix.
     */
    private void updateMatrix() {
+      // TODO: Normalize labels for nodes so there's no jumps in numbering
+
       this.output.clear();
 
       this.matrix = new String[this.xNodes.size() + this.yNodes.size() + this.leafNodes.size() + 2][this.xNodes.size() + this.yNodes.size() + this.leafNodes.size() + 2];
