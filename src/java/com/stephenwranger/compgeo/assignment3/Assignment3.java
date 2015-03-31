@@ -59,11 +59,7 @@ public class Assignment3 {
          final TrapezoidalMapAlgorithm algorithm = new TrapezoidalMapAlgorithm(bounds);
          final long startTime = System.nanoTime();
 
-         try {
-            algorithm.compute(segments, output, 5 * 60 * 1000);
-         } catch (final Exception e) {
-            e.printStackTrace();
-         }
+         algorithm.compute(segments, output, 5 * 60 * 1000);
          final long endTime = System.nanoTime();
          final long duration = endTime - startTime;
 

@@ -12,6 +12,8 @@ public abstract class TrapezoidalMapNode {
    public Set<TrapezoidalMapNode> parents    = new HashSet<TrapezoidalMapNode>();
    private TrapezoidalMapNode leftAbove  = null;
    private TrapezoidalMapNode rightBelow = null;
+   private String                 label      = null;
+   private int                    index      = -1;
 
    /**
     * Returns the set of parent nodes to this node; not a deep-copy so only modify in-line if this node's list should change.
@@ -94,7 +96,7 @@ public abstract class TrapezoidalMapNode {
 
    /**
     * Replaces the child of this node with the given new child node.
-    * 
+    *
     * @param existingChild
     * @param newChild
     */
@@ -104,5 +106,21 @@ public abstract class TrapezoidalMapNode {
       } else if (existingChild == this.getRightBelow()) {
          this.setRightBelow(newChild);
       }
+   }
+
+   public void setLabel(final String label) {
+      this.label = label;
+   }
+
+   public String getLabel() {
+      return this.label;
+   }
+
+   public void setIndex(final int index) {
+      this.index = index;
+   }
+
+   public int getIndex() {
+      return this.index;
    }
 }

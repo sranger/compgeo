@@ -8,7 +8,6 @@ import com.stephenwranger.graphics.math.intersection.IntersectionUtils;
  */
 public class XNode extends TrapezoidalMapNode {
    public final Tuple2d segmentEndpoint;
-   public String        label = null;
 
    /**
     * Creates a new XNode with the given segmentEndpoint and the left/right child nodes.
