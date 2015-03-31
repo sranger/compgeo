@@ -98,11 +98,16 @@ public class Assignment3 {
          double x = -1, y = -1;
 
          while(true) {
-            System.out.print("\nInput Point Query (x y): ");
+            System.out.print("\nInput Point Query [x y] (exit to quit): ");
             split = fin.readLine().split(" ");
+
+            if (split.length == 1 && split[0].equals("exit")) {
+               break;
+            }
 
             if(split.length != 2) {
                System.err.println("Invalid input, please enter only x and y values separated with a space then press enter to submit request.");
+               continue;
             }
 
             try {
@@ -110,6 +115,7 @@ public class Assignment3 {
                y = Double.parseDouble(split[1]);
             } catch (final Exception e) {
                System.err.println("Only numeric values accepted.");
+               continue;
             }
 
             algorithm.printQuery(new Tuple2d(x, y));
