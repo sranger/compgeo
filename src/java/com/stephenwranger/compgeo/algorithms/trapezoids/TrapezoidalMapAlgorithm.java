@@ -16,12 +16,16 @@ import com.stephenwranger.graphics.math.intersection.Trapezoid;
 public class TrapezoidalMapAlgorithm implements Algorithm<LineSegment, String[]> {
    private final Rectangle2D                                       bounds;
    private TrapezoidalMapNode                                      root;
-   private String[][]                                              matrix    = null;
-   private final LinkedHashMap<Tuple2d, Pair<String, Integer>>     xNodes    = new LinkedHashMap<Tuple2d, Pair<String, Integer>>();
-   private final LinkedHashMap<LineSegment, Pair<String, Integer>> yNodes    = new LinkedHashMap<LineSegment, Pair<String, Integer>>();
-   private final LinkedHashMap<Trapezoid, Pair<String, Integer>>   leafNodes = new LinkedHashMap<Trapezoid, Pair<String, Integer>>();
-   private List<String[]>                                          output    = null;
-   private int                                                     xNodeIndex = 0, yNodeIndex = 0, leafNodeIndex = 0;
+   private String[][]                                              matrix        = null;
+   private final LinkedHashMap<Tuple2d, Pair<String, Integer>>     xNodes        = new LinkedHashMap<Tuple2d, Pair<String, Integer>>();
+   private final LinkedHashMap<LineSegment, Pair<String, Integer>> yNodes        = new LinkedHashMap<LineSegment, Pair<String, Integer>>();
+   private final LinkedHashMap<Trapezoid, Pair<String, Integer>>   leafNodes     = new LinkedHashMap<Trapezoid, Pair<String, Integer>>();
+   public final List<Trapezoid>                                    trapezoids    = new ArrayList<Trapezoid>();
+   private List<String[]>                                          output        = null;
+   private int                                                     pNodeIndex    = 1;
+   private int                                                     qNodeIndex    = 1;
+   private int                                                     yNodeIndex    = 1;
+   private int                                                     leafNodeIndex = 1;
 
    public TrapezoidalMapAlgorithm(final Rectangle2D bounds) {
       this.bounds = bounds;
@@ -235,26 +239,34 @@ public class TrapezoidalMapAlgorithm implements Algorithm<LineSegment, String[]>
                for (final Pair<LeafNode, LeafNode> pair : toMerge) {
                   left = pair.left.getTrapezoid().getLeft();
                   right = pair.right.getTrapezoid().getRight();
-                  final Trapezoid merged = new Trapezoid(left.min, left.max, right.max, right.min);
-                  n = this.getLeafNode(merged);
-                  n.addNeighbors(pair.left.getNeighborsLeft());
-                  n.addNeighbors(pair.right.getNeighborsRight());
 
-                  newNodes.remove(pair.left);
-                  newNodes.remove(pair.right);
-                  newNodes.add(n);
-
-                  pair.left.removeAsNeighbor();
-                  pair.right.removeAsNeighbor();
-
-                  if (pair.left == this.root || pair.right == this.root) {
-                     this.root = n;
-                  } else {
-                     for (final TrapezoidalMapNode p : pair.left.getParentNodes()) {
-                        p.replaceChild(pair.left, n);
+                  // make sure we didn't merge it in a previous step
+                  if (newNodes.contains(pair.left) && newNodes.contains(pair.right)) {
+                     final Trapezoid merged = new Trapezoid(left.min, left.max, right.max, right.min);
+                     n = this.getLeafNode(merged);
+                     n.addNeighbors(pair.left.getNeighborsLeft());
+                     n.addNeighbors(pair.right.getNeighborsRight());
+                     if (ctr == 4) {
+                        System.out.println("left:  " + pair.left.getTrapezoid().getLeft() + ", " + pair.left.getTrapezoid().getRight());
+                        System.out.println("right: " + pair.right.getTrapezoid().getLeft() + ", " + pair.right.getTrapezoid().getRight());
                      }
-                     for (final TrapezoidalMapNode p : pair.right.getParentNodes()) {
-                        p.replaceChild(pair.right, n);
+
+                     newNodes.remove(pair.left);
+                     newNodes.remove(pair.right);
+                     newNodes.add(n);
+
+                     pair.left.removeAsNeighbor();
+                     pair.right.removeAsNeighbor();
+
+                     if (pair.left == this.root || pair.right == this.root) {
+                        this.root = n;
+                     } else {
+                        for (final TrapezoidalMapNode p : pair.left.getParentNodes()) {
+                           p.replaceChild(pair.left, n);
+                        }
+                        for (final TrapezoidalMapNode p : pair.right.getParentNodes()) {
+                           p.replaceChild(pair.right, n);
+                        }
                      }
                   }
                }
@@ -305,7 +317,7 @@ public class TrapezoidalMapAlgorithm implements Algorithm<LineSegment, String[]>
       if (this.leafNodes.containsKey(trapezoid)) {
          label = this.leafNodes.get(trapezoid);
       } else {
-         label = Pair.getInstance("T" + this.leafNodes.size(), this.leafNodeIndex);
+         label = Pair.getInstance("T" + this.leafNodeIndex, this.leafNodeIndex);
          this.leafNodeIndex++;
          this.leafNodes.put(trapezoid, label);
       }
@@ -331,8 +343,18 @@ public class TrapezoidalMapAlgorithm implements Algorithm<LineSegment, String[]>
       if (this.xNodes.containsKey(point)) {
          label = this.xNodes.get(point);
       } else {
-         label = Pair.getInstance(labelPrefix + this.xNodes.size(), this.xNodeIndex);
-         this.xNodeIndex++;
+         int index = -1;
+
+         if (labelPrefix.equals("P")) {
+            index = this.pNodeIndex;
+            this.pNodeIndex++;
+         } else {
+            index = this.qNodeIndex;
+            this.qNodeIndex++;
+         }
+
+         label = Pair.getInstance(labelPrefix + index, index);
+
          this.xNodes.put(point, label);
       }
 
@@ -357,7 +379,7 @@ public class TrapezoidalMapAlgorithm implements Algorithm<LineSegment, String[]>
       if (this.yNodes.containsKey(segment)) {
          label = this.yNodes.get(segment);
       } else {
-         label = Pair.getInstance("S" + this.yNodes.size(), this.yNodeIndex);
+         label = Pair.getInstance("S" + this.yNodeIndex, this.yNodeIndex);
          this.yNodeIndex++;
          this.yNodes.put(segment, label);
       }
@@ -381,6 +403,7 @@ public class TrapezoidalMapAlgorithm implements Algorithm<LineSegment, String[]>
       } else if (node instanceof YNode) {
          childIndex += this.xNodes.size();
       } else {
+         this.trapezoids.add(((LeafNode) node).getTrapezoid());
          childIndex += this.xNodes.size() + this.yNodes.size();
       }
 
@@ -412,6 +435,7 @@ public class TrapezoidalMapAlgorithm implements Algorithm<LineSegment, String[]>
       // TODO: Normalize labels for nodes so there's no jumps in numbering
 
       this.output.clear();
+      this.trapezoids.clear();
 
       this.matrix = new String[this.xNodes.size() + this.yNodes.size() + this.leafNodes.size() + 2][this.xNodes.size() + this.yNodes.size() + this.leafNodes.size() + 2];
       String[] row;
