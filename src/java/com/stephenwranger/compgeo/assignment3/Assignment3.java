@@ -12,9 +12,14 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
+
 import com.stephenwranger.compgeo.algorithms.trapezoids.TrapezoidalMapAlgorithm;
+import com.stephenwranger.graphics.Scene2d;
 import com.stephenwranger.graphics.math.Tuple2d;
 import com.stephenwranger.graphics.math.intersection.LineSegment;
+import com.stephenwranger.graphics.math.intersection.Trapezoid;
 import com.stephenwranger.graphics.utils.TimeUtils;
 
 public class Assignment3 {
@@ -22,7 +27,7 @@ public class Assignment3 {
          : "./run_assignment3.sh </path/to/inputFile>";
 
    public static void main(final String[] args) {
-      if(args.length == 0) {
+      if (args.length == 0 || args.length > 2) {
          System.err.println("Usage: " + Assignment3.USAGE_STRING);
          System.exit(1);
       }
@@ -32,6 +37,14 @@ public class Assignment3 {
       if(!file.exists() || !file.isFile()) {
          System.err.println("Input File specified " + ((!file.exists()) ? "does not exist." : "is not a file. ") + file.getAbsolutePath());
          System.exit(1);
+      }
+
+      boolean showUi = false;
+
+      if (args.length == 2) {
+         if (args[1].equals("--ui")) {
+            showUi = true;
+         }
       }
 
       final List<LineSegment> segments = new ArrayList<LineSegment>();
@@ -76,6 +89,36 @@ public class Assignment3 {
       System.out.println("Duration: " + TimeUtils.formatNanoseconds(duration) + " (" + duration + "ns)");
 
       final File outfile = new File("assignment3.csv");
+
+      if (showUi) {
+         final JFrame frame = new JFrame("Computational Geometry: Assignment 2");
+         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+         final Scene2d scene2d = new Scene2d(1000, 1000);
+
+         for (final Trapezoid t : algorithm.trapezoids) {
+            t.setScale(10);
+            t.setLineWidth(1f);
+            scene2d.addRenderable2d(t);
+         }
+
+         for (final LineSegment s : segments) {
+            s.setScale(10);
+            s.setLineWidth(6f);
+            scene2d.addRenderable2d(s);
+         }
+
+         frame.getContentPane().add(scene2d);
+
+         SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+               frame.pack();
+               frame.setLocation(100, 100);
+               frame.setVisible(true);
+            }
+         });
+      }
 
       try (final BufferedWriter fout = new BufferedWriter(new FileWriter(outfile))) {
          for(final String[] row : output) {
