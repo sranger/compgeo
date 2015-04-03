@@ -234,6 +234,7 @@ public class TrapezoidalMapAlgorithm implements Algorithm<LineSegment, String[]>
             LeafNode n, m;
             LineSegment left, right;
 
+            // TODO: last node to get merged didn't get added to graph? (T27)
             do {
                // for any pair of nodes that contained an identical edge, merge them
                for (final Pair<LeafNode, LeafNode> pair : toMerge) {
@@ -403,6 +404,7 @@ public class TrapezoidalMapAlgorithm implements Algorithm<LineSegment, String[]>
       } else if (node instanceof YNode) {
          childIndex += this.xNodes.size();
       } else {
+         ((LeafNode) node).getTrapezoid().setLabel(node.getLabel());
          this.trapezoids.add(((LeafNode) node).getTrapezoid());
          childIndex += this.xNodes.size() + this.yNodes.size();
       }
