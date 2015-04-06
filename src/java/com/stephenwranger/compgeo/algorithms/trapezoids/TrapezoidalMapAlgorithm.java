@@ -22,10 +22,10 @@ public class TrapezoidalMapAlgorithm implements Algorithm<LineSegment, String[]>
    private final LinkedHashMap<Trapezoid, Pair<String, Integer>>   leafNodes     = new LinkedHashMap<Trapezoid, Pair<String, Integer>>();
    public final List<Trapezoid>                                    trapezoids    = new ArrayList<Trapezoid>();
    private List<String[]>                                          output        = null;
-   private int                                                     pNodeIndex    = 1;
-   private int                                                     qNodeIndex    = 1;
-   private int                                                     yNodeIndex    = 1;
-   private int                                                     leafNodeIndex = 1;
+   private int                                                     pNodeIndex    = 0;
+   private int                                                     qNodeIndex    = 0;
+   private int                                                     yNodeIndex    = 0;
+   private int                                                     leafNodeIndex = 0;
 
    public TrapezoidalMapAlgorithm(final Rectangle2D bounds) {
       this.bounds = bounds;
@@ -65,12 +65,9 @@ public class TrapezoidalMapAlgorithm implements Algorithm<LineSegment, String[]>
       List<LeafNode> intersected;
       LeafNode leaf;
       Trapezoid trapezoid;
-      int ctr = 0;
 
       // loop over all input segments and insert them one at a time
       for (final LineSegment segment : input) {
-         System.out.println("segment #" + ctr++);
-
          if ((System.nanoTime() - startTime) / 1000000l > timeout) {
             return false;
          }
@@ -247,10 +244,8 @@ public class TrapezoidalMapAlgorithm implements Algorithm<LineSegment, String[]>
                      n = this.getLeafNode(merged);
                      n.addNeighbors(pair.left.getNeighborsLeft());
                      n.addNeighbors(pair.right.getNeighborsRight());
-                     if (ctr == 4) {
-                        System.out.println("left:  " + pair.left.getTrapezoid().getLeft() + ", " + pair.left.getTrapezoid().getRight());
-                        System.out.println("right: " + pair.right.getTrapezoid().getLeft() + ", " + pair.right.getTrapezoid().getRight());
-                     }
+                     n.addParentNode(pair.left.getParentNodes(), pair.left);
+                     n.addParentNode(pair.right.getParentNodes(), pair.right);
 
                      newNodes.remove(pair.left);
                      newNodes.remove(pair.right);
@@ -261,13 +256,6 @@ public class TrapezoidalMapAlgorithm implements Algorithm<LineSegment, String[]>
 
                      if (pair.left == this.root || pair.right == this.root) {
                         this.root = n;
-                     } else {
-                        for (final TrapezoidalMapNode p : pair.left.getParentNodes()) {
-                           p.replaceChild(pair.left, n);
-                        }
-                        for (final TrapezoidalMapNode p : pair.right.getParentNodes()) {
-                           p.replaceChild(pair.right, n);
-                        }
                      }
                   }
                }
@@ -393,14 +381,14 @@ public class TrapezoidalMapAlgorithm implements Algorithm<LineSegment, String[]>
    }
 
    private void updateNode(final TrapezoidalMapNode node) {
-      if (node == null) {
+      if (node == null || (!(node instanceof LeafNode) && node.getLeftAbove() == null && node.getRightBelow() == null)) {
          return;
       }
 
       int parentIndex = 0, childIndex = node.getIndex();
 
       if (node instanceof XNode) {
-         childIndex += 0;
+         childIndex += ((node.getLabel().startsWith("P")) ? 0 : this.pNodeIndex);
       } else if (node instanceof YNode) {
          childIndex += this.xNodes.size();
       } else {
@@ -416,7 +404,7 @@ public class TrapezoidalMapAlgorithm implements Algorithm<LineSegment, String[]>
          parentIndex = parent.getIndex();
 
          if (parent instanceof XNode) {
-            parentIndex += 0;
+            parentIndex += ((parent.getLabel().startsWith("P")) ? 0 : this.pNodeIndex);
          } else if (parent instanceof YNode) {
             parentIndex += this.xNodes.size();
          } else {
