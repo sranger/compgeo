@@ -4,26 +4,29 @@ References
 	- class lecture notes
 	
 To Build: 
-	- install apache ant and Java8 and make sure both are in path for host system (can be manually set in build/run scripts)
+	- install apache ant and Java8 and make sure both are in path for host 
+	  system (can be manually set in build/run scripts)
 	- use build.bat (windows) or build.sh (linux)
 To Run: 
 	cd runScripts/Assignment3
-	run_assignment3.(bat/sh) <input_file>
+	run_assignment3.(bat/sh) <input_file> [--ui]
 	
-Once computation is complete; the application will allow the user to insert matrix queries as 
-x and y values separated by a space. The path through the graph will be printed for the user.
-	
-NOTES: (UPDATE)
+Once computation is complete; the application will allow the user to insert 
+matrix queries as x and y values separated by a space. The path through the 
+graph will be printed for the user.
 
-I had a tough time getting the node merging to work correctly. The assignment builds and runs but 
-crashes with attempting to insert the third line segment. I believe it has something to do with
-when I go to insert either nodes that need to be merged or the merged nodes after-the-fact. Either
-I'm creating the map hierarchy wrong or I'm updating the trapezoid neighbors incorrectly. 
+If the --ui flag is given (affter the input file), a JFrame will be displayed
+containing the resulting trapezoidal map.
 
-I've created a file, diagram.png, with the trapezoid graph that the system outputs before crashing and 
-there do seem to be issues. If I end it after inserting the first segment, the map is correct. It also 
-looks correct after the second segment (if I remember correctly) but after the third, it requires some 
-trapezoids to be merged and it has trouble. However, the map.png is what the map should have looked 
-like had it worked correctly. The matrix.pdf is the output of the application before crashing with the
-row/column sums added and color-coded. If you run the application, the main program directory will 
-contain an "assignment3.csv" with the actual output file.
+The adjacency graph will be outputted as assignment3.csv file at the end of 
+the initial map construction. This can be found in the directory the assignment
+was run from.
+
+The adjacency graph is located in the directory along with this readme as 
+adjacencyGraph.ods (LibreOffice) or adjacencyGraph.pdf (Acrobat). The 
+trapezoidal map can be seen in map.png; also in this directory.
+
+The labels are in a base-0 system (instead of starting at 1 like your example)
+and the leaf nodes were not compacted once merged nodes were removed so they
+are not explicitly linear. However, the labels in the adjacency graph and the
+trapezoidal map do match.

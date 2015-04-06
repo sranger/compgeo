@@ -163,6 +163,8 @@ public class Assignment3 {
 
             algorithm.printQuery(new Tuple2d(x, y));
          }
+
+         System.exit(0);
       } catch (final IOException e) {
          e.printStackTrace();
       }

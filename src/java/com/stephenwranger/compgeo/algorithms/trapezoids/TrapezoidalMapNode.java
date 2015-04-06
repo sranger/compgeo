@@ -28,9 +28,30 @@ public abstract class TrapezoidalMapNode {
     * Adds the given node as a parent to this node.
     *
     * @param parent
+    * @param oldChild
     */
-   public void addParentNode(final TrapezoidalMapNode parent) {
+   public void addParentNode(final TrapezoidalMapNode parent, final TrapezoidalMapNode oldChild) {
       this.parents.add(parent);
+
+      if (oldChild != null) {
+         parent.replaceChild(oldChild, this);
+      }
+   }
+
+   /**
+    * Adds the given node as a parent to this node.
+    *
+    * @param parent
+    * @param oldChild
+    */
+   public void addParentNode(final Set<TrapezoidalMapNode> parents, final TrapezoidalMapNode oldChild) {
+      this.parents.addAll(parents);
+
+      if (oldChild != null) {
+         for (final TrapezoidalMapNode parent : parents) {
+            parent.replaceChild(oldChild, this);
+         }
+      }
    }
 
    /**
@@ -60,7 +81,7 @@ public abstract class TrapezoidalMapNode {
       this.leftAbove = leftAbove;
 
       if (this.leftAbove != null) {
-         this.leftAbove.addParentNode(this);
+         this.leftAbove.addParentNode(this, null);
       }
    }
 
@@ -82,7 +103,7 @@ public abstract class TrapezoidalMapNode {
       this.rightBelow = rightBelow;
 
       if (this.rightBelow != null) {
-         this.rightBelow.addParentNode(this);
+         this.rightBelow.addParentNode(this, null);
       }
    }
 
