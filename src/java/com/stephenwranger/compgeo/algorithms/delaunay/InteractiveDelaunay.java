@@ -35,6 +35,8 @@ public class InteractiveDelaunay {
       final DelaunayTriangulation dt = new DelaunayTriangulation();
 
       final JPanel panel = new JPanel() {
+         private static final long serialVersionUID = -5113240506547207623L;
+
          @Override
          public void paint(final Graphics g) {
             g.setColor(new Color(0.8f, 0.8f, 0.8f));
