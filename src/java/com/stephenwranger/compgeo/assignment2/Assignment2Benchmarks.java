@@ -21,7 +21,7 @@ public class Assignment2Benchmarks {
 
    public static void main(final String[] args) {
       final List<LineSegment> input = new ArrayList<LineSegment>();
-      final int[] testSizes = new int[] { 100000 };// 10, 100, 1000, 10000, 100000 };
+      final int[] testSizes = new int[] { 10, 100, 1000 };// , 10000, 100000 };
       int runCount = 10;
 
       if (args.length >= 1) {
