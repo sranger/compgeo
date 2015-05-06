@@ -14,14 +14,24 @@ import com.stephenwranger.graphics.math.Tuple2d;
 import com.stephenwranger.graphics.math.intersection.LineSegment;
 import com.stephenwranger.graphics.math.intersection.Triangle2D;
 import com.stephenwranger.graphics.renderables.Circle;
+import com.stephenwranger.graphics.utils.Iterative;
+import com.stephenwranger.graphics.utils.IterativeListener;
 
-public class DelaunayTriangulation {
-   private final List<Tuple2d>    vertices  = new ArrayList<Tuple2d>();
+public class DelaunayTriangulation implements Iterative {
+   private final List<Tuple2d>                     vertices            = new ArrayList<Tuple2d>();
    private final Map<LineSegment, Set<Triangle2D>> edgesToTrianglesMap = new HashMap<LineSegment, Set<Triangle2D>>();
-   private final Set<Triangle2D> triangles = new HashSet<Triangle2D>();
+   private final Set<Triangle2D>                   triangles           = new HashSet<Triangle2D>();
+   private final Set<IterativeListener>            listeners           = new HashSet<IterativeListener>();
 
-   public DelaunayTriangulation() {
+   private final Triangle2D                        boundingTriangle;
 
+   public DelaunayTriangulation(final Triangle2D boundingTriangle) {
+      this.boundingTriangle = boundingTriangle;
+
+      final Tuple2d[] corners = this.boundingTriangle.getCorners();
+      this.addVertex(corners[0]);
+      this.addVertex(corners[1]);
+      this.addVertex(corners[2]);
    }
 
    public void addVertex(final Tuple2d vertex) {
@@ -51,19 +61,19 @@ public class DelaunayTriangulation {
          }
 
          if (!edges.isEmpty()) {
-            getUniqueEdges(edges, output);
-            
+            DelaunayTriangulation.getUniqueEdges(edges, output);
+
             Triangle2D triangle;
 
             for (final LineSegment segment : output) {
                triangle = new Triangle2D(segment.min, segment.max, vertex);
                newTriangles.add(triangle);
-               addTriangle(triangle);
+               this.addTriangle(triangle);
             }
          }
-         
-         if(!newTriangles.isEmpty()) {
-            verifyDelaunay(newTriangles);
+
+         if (!newTriangles.isEmpty()) {
+            this.verifyDelaunay(newTriangles);
          }
       }
    }
@@ -75,54 +85,59 @@ public class DelaunayTriangulation {
    public void clear() {
       this.triangles.clear();
       this.vertices.clear();
+      this.edgesToTrianglesMap.clear();
+
+      final Tuple2d[] corners = this.boundingTriangle.getCorners();
+      this.addVertex(corners[0]);
+      this.addVertex(corners[1]);
+      this.addVertex(corners[2]);
    }
-   
+
    private void removeTriangle(final Triangle2D triangle) {
       this.triangles.remove(triangle);
-      
+
       Set<Triangle2D> set;
-      
-      for(final LineSegment segment : triangle.getLineSegments()) {
+
+      for (final LineSegment segment : triangle.getLineSegments()) {
          set = this.edgesToTrianglesMap.get(segment);
-         
-         if(set != null) {
+
+         if (set != null) {
             set.remove(triangle);
          }
       }
    }
-   
+
    private void addTriangle(final Triangle2D triangle) {
       this.triangles.add(triangle);
-      
+
       Set<Triangle2D> set;
-      
-      for(final LineSegment segment : triangle.getLineSegments()) {
+
+      for (final LineSegment segment : triangle.getLineSegments()) {
          set = this.edgesToTrianglesMap.get(segment);
-         
-         if(set == null) {
+
+         if (set == null) {
             set = new HashSet<Triangle2D>();
             this.edgesToTrianglesMap.put(segment, set);
          }
-         
+
          set.add(triangle);
       }
    }
-   
+
    private void verifyDelaunay(final Set<Triangle2D> toCheck) {
       final Set<Triangle2D> toCheckNext = new HashSet<Triangle2D>();
-      
+
       Set<Triangle2D> neighbors;
       Pair<Triangle2D, Triangle2D> newTriangles;
       boolean hasFlipped = false;
-      
-      for(final Triangle2D triangle : toCheck) {
+
+      for (final Triangle2D triangle : toCheck) {
          neighbors = this.getNeighbors(triangle);
-         
-         for(final Triangle2D neighbor : neighbors) {
-            if(hasFlipped) {
+
+         for (final Triangle2D neighbor : neighbors) {
+            if (hasFlipped) {
                toCheckNext.add(neighbor);
-            } else if((newTriangles = fixDelaunay(triangle, neighbor)) != null) {
-               System.out.println("flipping");
+            } else if ((newTriangles = this.fixDelaunay(triangle, neighbor)) != null) {
                this.removeTriangle(triangle);
                this.removeTriangle(neighbor);
 
@@ -131,20 +146,20 @@ public class DelaunayTriangulation {
 
                toCheckNext.add(newTriangles.left);
                toCheckNext.add(newTriangles.right);
-               
+
                hasFlipped = true;
             }
          }
       }
-      
-      if(!toCheckNext.isEmpty()) {
+
+      if (!toCheckNext.isEmpty()) {
          this.verifyDelaunay(toCheckNext);
       }
    }
-   
+
    /**
     * Checks if the two given triangles form a valid delaunay triangulation and if not, flips their common edge.
-    * 
+    *
     * @param t1
     * @param t2
     * @return the new triangles or null if no changes were made
@@ -155,20 +170,19 @@ public class DelaunayTriangulation {
       final Pair<LineSegment, LineSegment> corner2 = t2.getOppositeEdges(edge);
 
       final double angle = Math.toDegrees(Math.abs(corner1.left.getAngle(corner1.right)) + Math.abs(corner2.left.getAngle(corner2.right)));
-      System.out.println("angle: " + angle);
-      
-      if(angle > 180.0) {
+
+      if (angle > 180.0) {
          final Tuple2d commonVertex1 = corner1.left.getCommonVertex(corner1.right);
          final Tuple2d commonVertex2 = corner2.left.getCommonVertex(corner2.right);
          final Triangle2D newT1 = new Triangle2D(edge.min, commonVertex1, commonVertex2);
          final Triangle2D newT2 = new Triangle2D(edge.max, commonVertex1, commonVertex2);
-         
+
          return Pair.getInstance(newT1, newT2);
       }
-      
+
       return null;
    }
-   
+
    private Set<Triangle2D> getNeighbors(final Triangle2D triangle) {
       final Set<Triangle2D> neighbors = new HashSet<Triangle2D>();
 
@@ -181,14 +195,36 @@ public class DelaunayTriangulation {
 
       return neighbors;
    }
-   
+
    private static void getUniqueEdges(final List<LineSegment> input, final List<LineSegment> output) {
       output.clear();
-      
-      for(final LineSegment segment : input) {
-         if(!output.remove(segment)) {
+
+      for (final LineSegment segment : input) {
+         if (!output.remove(segment)) {
             output.add(segment);
          }
+      }
+   }
+
+   @Override
+   public void continueIteration() {
+      // TODO Auto-generated method stub
+
+   }
+
+   @Override
+   public void addIterativeListener(IterativeListener listener) {
+      this.listeners.add(listener);
+   }
+
+   @Override
+   public void removeIterativeListener(IterativeListener listener) {
+      this.listeners.remove(listener);
+   }
+
+   private void notifyListeners(final Object message) {
+      for (final IterativeListener listener : this.listeners) {
+         listener.step(this, message);
       }
    }
 }

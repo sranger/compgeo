@@ -21,6 +21,8 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import com.stephenwranger.graphics.math.Tuple2d;
+import com.stephenwranger.graphics.math.Tuple3d;
+import com.stephenwranger.graphics.math.intersection.IntersectionUtils;
 import com.stephenwranger.graphics.math.intersection.Triangle2D;
 import com.stephenwranger.graphics.renderables.Circle;
 
@@ -31,8 +33,11 @@ public class InteractiveDelaunay {
       final JFrame frame = new JFrame("Interactive Delaunay Triangulation");
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
+      final int width = 800;
+      final int height = 500;
       final List<Point> clicks = new ArrayList<Point>();
-      final DelaunayTriangulation dt = new DelaunayTriangulation();
+      final Triangle2D boundingTriangle = new Triangle2D(new Tuple2d(0, 0), new Tuple2d(width * width, 0), new Tuple2d(0, height * height));
+      final DelaunayTriangulation dt = new DelaunayTriangulation(boundingTriangle);
 
       final JPanel panel = new JPanel() {
          private static final long serialVersionUID = -5113240506547207623L;
@@ -50,14 +55,24 @@ public class InteractiveDelaunay {
 
             Tuple2d[] corners;
             Circle c;
+            Tuple3d bary;
 
-            for(final Triangle2D t : dt.getTriangles()) {
+            mainLoop: for (final Triangle2D t : dt.getTriangles()) {
                corners = t.getCorners();
+
+               // don't draw if it's attached to the bounding triangle
+               for (final Tuple2d corner : corners) {
+                  bary = boundingTriangle.getBarycentricCoordinate(corner);
+
+                  if (IntersectionUtils.isEqual(bary.x, 0.0) || IntersectionUtils.isEqual(bary.y, 0.0) || IntersectionUtils.isEqual(bary.z, 0.0)) {
+                     continue mainLoop;
+                  }
+               }
 
                g.drawPolygon(new int[] { (int) corners[0].x, (int) corners[1].x, (int) corners[2].x }, new int[] { (int) corners[0].y, (int) corners[1].y,
                      (int) corners[2].y }, 3);
 
-               if (isEnableCircles) {
+               if (InteractiveDelaunay.isEnableCircles) {
                   c = t.getCircumscribedCircle();
 
                   g.drawOval((int) (c.getCenter().x - c.getRadius()), (int) (c.getCenter().y - c.getRadius()), (int) (c.getRadius() * 2.0),
@@ -81,7 +96,7 @@ public class InteractiveDelaunay {
       enableCircles.addActionListener(new ActionListener() {
          @Override
          public void actionPerformed(final ActionEvent e) {
-            isEnableCircles = enableCircles.isSelected();
+            InteractiveDelaunay.isEnableCircles = enableCircles.isSelected();
             panel.repaint();
          }
       });
