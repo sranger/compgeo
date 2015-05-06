@@ -34,8 +34,10 @@ public class DelaunayTriangulation implements Iterative {
       this.addVertex(corners[2]);
    }
 
-   public void addVertex(final Tuple2d vertex) {
+   public synchronized void addVertex(final Tuple2d vertex) {
       this.vertices.add(vertex);
+
+      this.notifyListeners("Adding New Vertex: " + vertex);
 
       if (this.vertices.size() == 3) {
          this.triangles.add(new Triangle2D(this.vertices.get(0), this.vertices.get(1), this.vertices.get(2)));
@@ -43,6 +45,7 @@ public class DelaunayTriangulation implements Iterative {
          final List<Triangle2D> needsReplacing = new ArrayList<Triangle2D>();
          Circle c = null;
 
+         this.notifyListeners("Checking New Point against existing Triangle's Circumscribed Circles.");
          for (final Triangle2D t : this.triangles) {
             c = t.getCircumscribedCircle();
 
@@ -50,6 +53,8 @@ public class DelaunayTriangulation implements Iterative {
                needsReplacing.add(t);
             }
          }
+
+         this.notifyListeners("Found " + needsReplacing.size() + " triangles that need updating; removing them from the triangulation.");
 
          final List<LineSegment> edges = new ArrayList<LineSegment>();
          final List<LineSegment> output = new ArrayList<LineSegment>();
@@ -60,8 +65,12 @@ public class DelaunayTriangulation implements Iterative {
             this.removeTriangle(tri);
          }
 
+         this.notifyListeners("Removing any non-unique edges from removed triangles.");
+
          if (!edges.isEmpty()) {
             DelaunayTriangulation.getUniqueEdges(edges, output);
+            this.notifyListeners("Number of unique edges found: " + output.size());
+            this.notifyListeners("Creating new Triangles from unique edge list and inserted vertex.");
 
             Triangle2D triangle;
 
@@ -69,13 +78,21 @@ public class DelaunayTriangulation implements Iterative {
                triangle = new Triangle2D(segment.min, segment.max, vertex);
                newTriangles.add(triangle);
                this.addTriangle(triangle);
+               this.notifyListeners("Triangle added: " + triangle);
             }
+         } else {
+            this.notifyListeners("No unique edges; something probably went wrong.");
          }
 
          if (!newTriangles.isEmpty()) {
+            this.notifyListeners("Total Triangles added: " + newTriangles.size() + "; verifying Delaunay properties.");
             this.verifyDelaunay(newTriangles);
+         } else {
+            this.notifyListeners("No new Triangles; something probably went wrong.");
          }
       }
+
+      this.notifyListeners("Addition of new Vertex complete.");
    }
 
    public Iterable<Triangle2D> getTriangles() {
@@ -133,16 +150,23 @@ public class DelaunayTriangulation implements Iterative {
 
       for (final Triangle2D triangle : toCheck) {
          neighbors = this.getNeighbors(triangle);
+         this.notifyListeners("Checking neighbors of " + triangle
+               + " for invalid triangulation.\nThis occurs if the sum of the two internal angles opposite the shared"
+               + " edge exceed 180 degrees. With our recursive iterative algorithm, it should rarely occur.");
 
          for (final Triangle2D neighbor : neighbors) {
             if (hasFlipped) {
+               this.notifyListeners("Adding existing triangles to next verify loop: " + neighbor);
                toCheckNext.add(neighbor);
             } else if ((newTriangles = this.fixDelaunay(triangle, neighbor)) != null) {
+               this.notifyListeners("Removing invalid delaunay triangulation and flipping shared edge.");
                this.removeTriangle(triangle);
                this.removeTriangle(neighbor);
+               this.notifyListeners("Removed triangles: " + triangle + ", " + neighbor);
 
                this.addTriangle(newTriangles.left);
                this.addTriangle(newTriangles.right);
+               this.notifyListeners("Flipped additions: " + newTriangles.left + ", " + newTriangles.right);
 
                toCheckNext.add(newTriangles.left);
                toCheckNext.add(newTriangles.right);
@@ -153,7 +177,10 @@ public class DelaunayTriangulation implements Iterative {
       }
 
       if (!toCheckNext.isEmpty()) {
+         this.notifyListeners("Verifying delaunay with remainder of new triangles list along with all flipped triangles.");
          this.verifyDelaunay(toCheckNext);
+      } else {
+         this.notifyListeners("Verification complete.");
       }
    }
 
@@ -222,9 +249,9 @@ public class DelaunayTriangulation implements Iterative {
       this.listeners.remove(listener);
    }
 
-   private void notifyListeners(final Object message) {
+   private void notifyListeners(final String message, final Object... payload) {
       for (final IterativeListener listener : this.listeners) {
-         listener.step(this, message);
+         listener.step(this, message, Arrays.asList(payload));
       }
    }
 }
