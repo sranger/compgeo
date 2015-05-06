@@ -3,10 +3,12 @@ package com.stephenwranger.compgeo.algorithms.delaunay;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GridLayout;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
@@ -15,17 +17,27 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
+import javax.swing.JTextArea;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
+import javax.swing.border.BevelBorder;
 
 import com.stephenwranger.graphics.math.Tuple2d;
 import com.stephenwranger.graphics.math.Tuple3d;
 import com.stephenwranger.graphics.math.intersection.IntersectionUtils;
+import com.stephenwranger.graphics.math.intersection.LineSegment;
 import com.stephenwranger.graphics.math.intersection.Triangle2D;
 import com.stephenwranger.graphics.renderables.Circle;
 import com.stephenwranger.graphics.utils.Iterative;
@@ -44,16 +56,11 @@ public class InteractiveDelaunay {
       final List<Point> clicks = new ArrayList<Point>();
       final Triangle2D boundingTriangle = new Triangle2D(new Tuple2d(0, 0), new Tuple2d(width * 10, 0), new Tuple2d(0, height * 10));
       final DelaunayTriangulation dt = new DelaunayTriangulation(boundingTriangle);
-      dt.addIterativeListener(new IterativeListener() {
-         @Override
-         public void step(final Iterative source, final String message, final List<Object> payload) {
-
-            // TODO: get this to pause for the call to continueIteration
-            System.out.println(message + ": " + payload.size());
-            source.continueIteration();
-         }
-      });
-
+      final List<Tuple2d> eventVertices = new CopyOnWriteArrayList<Tuple2d>();
+      final List<LineSegment> eventEdges = new CopyOnWriteArrayList<LineSegment>();
+      final List<Circle> eventCircles = new CopyOnWriteArrayList<Circle>();
+      final List<Triangle2D> eventTriangles = new CopyOnWriteArrayList<Triangle2D>();
+      
       final JPanel panel = new JPanel() {
          private static final long serialVersionUID = -5113240506547207623L;
 
@@ -112,17 +119,54 @@ public class InteractiveDelaunay {
             for (final Point vert : clicks) {
                g.fillOval(vert.x - 3, vert.y - 3, 6, 6);
             }
+            
+            g.setColor(Color.green);
+            ((Graphics2D) g).setStroke(new BasicStroke(2f));
+            
+            for(final LineSegment edge : eventEdges) {
+               g.drawLine((int)edge.min.x, (int)edge.min.y, (int)edge.max.x, (int)edge.max.y);
+            }
+            
+            for(final Triangle2D triangle : eventTriangles) {
+               for(final LineSegment edge : triangle.getLineSegments()) {
+                  g.drawLine((int)edge.min.x, (int)edge.min.y, (int)edge.max.x, (int)edge.max.y);
+               }
+            }
+
+            g.setColor(Color.green.darker());
+            for(final Circle circle : eventCircles) {
+               g.drawOval((int) (circle.getCenter().x - circle.getRadius()), (int) (circle.getCenter().y - circle.getRadius()), (int) (circle.getRadius() * 2.0),
+                          (int) (circle.getRadius() * 2.0));
+            }
+
+            g.setColor(Color.green.darker().darker());
+            for(final Tuple2d vertex : eventVertices) {
+               g.fillOval((int)(vertex.x - 5), (int)(vertex.y - 5), 10, 10);
+            }
          }
       };
+      
+      final JPanel messagePanel = new JPanel(new GridLayout(1, 1));
+      messagePanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED, Color.GRAY, Color.DARK_GRAY));
+      final JTextArea messageArea = new JTextArea();
+      messageArea.setWrapStyleWord(true);
+      messageArea.setLineWrap(true);
+      final JScrollPane messagePane = new JScrollPane(messageArea);
+      messagePane.setPreferredSize(new Dimension(1000, 100));
+      messagePane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+      messagePane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+      messagePanel.add(messagePane);
 
       final MouseAdapter mouseListener = new MouseAdapter() {
          long lastAddition = 0;
 
          @Override
          public void mouseClicked(final MouseEvent e) {
-            clicks.add(e.getPoint());
-            dt.addVertex(new Tuple2d(e.getX(), e.getY()));
-            panel.repaint();
+            if(!dt.isBusy()) {
+               clicks.add(e.getPoint());
+               dt.addVertex(new Tuple2d(e.getX(), e.getY()));
+               panel.repaint();
+            }
          }
 
          @Override
@@ -145,6 +189,7 @@ public class InteractiveDelaunay {
 
       final JCheckBox enableCircles = new JCheckBox("Enable Circumcircles");
       enableCircles.setSelected(false);
+      enableCircles.setMaximumSize(new Dimension(200, 30));
       enableCircles.addActionListener(new ActionListener() {
          @Override
          public void actionPerformed(final ActionEvent e) {
@@ -154,25 +199,88 @@ public class InteractiveDelaunay {
       });
 
       final JButton clear = new JButton("Clear");
+      clear.setMaximumSize(new Dimension(200, 30));
       clear.addActionListener(new ActionListener() {
          @Override
          public void actionPerformed(final ActionEvent e) {
             dt.clear();
             panel.repaint();
             clicks.clear();
+            eventVertices.clear();
+            eventEdges.clear();
+            eventCircles.clear();
+            eventTriangles.clear();
          }
       });
+      
+      // TODO: add file of points ingestion
+
+
+      final JCheckBox useDelay = new JCheckBox("Use Step Delay");
+      useDelay.setSelected(false);
+      useDelay.setMaximumSize(new Dimension(200, 30));
+      
+      final JLabel delayLabel = new JLabel("Step Delay (ms)");
+      final JSpinner delay = new JSpinner(new SpinnerNumberModel(100, 0, Integer.MAX_VALUE, 1));
+      final JPanel delayPanel = new JPanel();
+      delayPanel.setLayout(new BoxLayout(delayPanel, BoxLayout.Y_AXIS));
+      delayPanel.setMaximumSize(new Dimension(200, 60));
+      delayPanel.add(delayLabel);
+      delayPanel.add(delay);
 
       final JPanel leftPanel = new JPanel();
       leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
+      enableCircles.setAlignmentX( Component.LEFT_ALIGNMENT );
       leftPanel.add(enableCircles);
+      clear.setAlignmentX( Component.LEFT_ALIGNMENT );
       leftPanel.add(clear);
+      useDelay.setAlignmentX( Component.LEFT_ALIGNMENT );
+      leftPanel.add(useDelay);
+      delayPanel.setAlignmentX( Component.LEFT_ALIGNMENT );
+      leftPanel.add(delayPanel);
       leftPanel.setMaximumSize(new Dimension(200, 500));
+      leftPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED, Color.GRAY, Color.DARK_GRAY));
 
       final Container content = frame.getContentPane();
       content.setLayout(new BorderLayout());
       content.add(panel, BorderLayout.CENTER);
       content.add(leftPanel, BorderLayout.EAST);
+      content.add(messagePanel, BorderLayout.SOUTH);
+      
+      dt.addIterativeListener(new IterativeListener() {
+         @Override
+         public void step(final Iterative source, final String message, final List<Object> payload) {
+            messageArea.append("\n" + message);
+            messageArea.setCaretPosition(messageArea.getText().length());
+            eventVertices.clear();
+            eventEdges.clear();
+            eventCircles.clear();
+            eventTriangles.clear();
+            
+            for(final Object p : payload) {
+               if(p instanceof Tuple2d) {
+                  eventVertices.add((Tuple2d)p);
+               } else if(p instanceof LineSegment) {
+                  eventEdges.add((LineSegment)p);
+               } else if(p instanceof Circle) {
+                  eventCircles.add((Circle)p);
+               } else if(p instanceof Triangle2D) {
+                  eventTriangles.add((Triangle2D)p);
+               }
+            }
+            
+            if(useDelay.isSelected()) {
+               try {
+                  Thread.sleep(100);
+               } catch (InterruptedException e) {
+                  e.printStackTrace();
+               }
+            }
+            
+            source.continueIteration();
+            panel.repaint();
+         }
+      });
 
       SwingUtilities.invokeLater(new Runnable() {
          @Override
