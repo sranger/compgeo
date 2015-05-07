@@ -51,7 +51,8 @@ public class DelaunayTriangulation implements Iterative {
       final Tuple3d bary = this.boundingTriangle.getBarycentricCoordinate(vertex);
 
       if (IntersectionUtils.isLessOrEqual(bary.x, 0) || IntersectionUtils.isLessOrEqual(bary.y, 0) || IntersectionUtils.isGreaterThan(bary.x + bary.y + bary.z, 1)) {
-         DelaunayTriangulation.this.notifyListeners("Vertex is on, or outside, the bounding triangle; skipping." + vertex + ", " + bary);
+         DelaunayTriangulation.this.notifyListeners("Vertex is on, or outside, the bounding triangle; skipping." + vertex + ", " + bary,
+               sendIterativeListenerNotifications);
          return;
       }
 
@@ -69,9 +70,7 @@ public class DelaunayTriangulation implements Iterative {
    private void addVertexImpl(final Tuple2d vertex, final boolean sendIterativeListenerNotifications) {
       DelaunayTriangulation.this.vertices.add(vertex);
 
-      if(sendIterativeListenerNotifications) {
-         DelaunayTriangulation.this.notifyListeners("Adding New Vertex: " + vertex, vertex);
-      }
+      DelaunayTriangulation.this.notifyListeners("Adding New Vertex: " + vertex, sendIterativeListenerNotifications, vertex);
 
       if (DelaunayTriangulation.this.vertices.size() == 3) {
          DelaunayTriangulation.this.addTriangle(new Triangle2d(DelaunayTriangulation.this.vertices.get(0), DelaunayTriangulation.this.vertices.get(1),
@@ -80,25 +79,19 @@ public class DelaunayTriangulation implements Iterative {
          final List<Triangle2d> needsReplacing = new ArrayList<Triangle2d>();
          Circle c = null;
 
-         if(sendIterativeListenerNotifications) {
-            DelaunayTriangulation.this.notifyListeners("Checking New Point against existing Triangle's Circumscribed Circles.");
-         }
+         DelaunayTriangulation.this.notifyListeners("Checking New Point against existing Triangles' Circumscribed Circles.", sendIterativeListenerNotifications);
          for (final Triangle2d t : DelaunayTriangulation.this.triangles) {
             c = t.getCircumscribedCircle();
 
-            if(sendIterativeListenerNotifications) {
-               DelaunayTriangulation.this.notifyListeners("\tChecking circumcircle.", t, c);
-            }
-
             if (c.contains(vertex)) {
+               DelaunayTriangulation.this.notifyListeners("\tFound intersecting circumcircle.", sendIterativeListenerNotifications, t, c);
                needsReplacing.add(t);
             }
          }
 
-         if(sendIterativeListenerNotifications) {
-            DelaunayTriangulation.this.notifyListeners("Found " + needsReplacing.size()
-                  + " triangles that need updating; removing them from the triangulation.", needsReplacing.toArray());
-         }
+         DelaunayTriangulation.this.notifyListeners("Found " + needsReplacing.size()
+               + " triangles that need updating; removing them from the triangulation.",
+               sendIterativeListenerNotifications, needsReplacing.toArray());
 
          final List<LineSegment> edges = new ArrayList<LineSegment>();
          final List<LineSegment> output = new ArrayList<LineSegment>();
@@ -109,16 +102,13 @@ public class DelaunayTriangulation implements Iterative {
             DelaunayTriangulation.this.removeTriangle(tri);
          }
 
-         if(sendIterativeListenerNotifications) {
-            DelaunayTriangulation.this.notifyListeners("Removing any non-unique edges from removed triangles.");
-         }
+         DelaunayTriangulation.this.notifyListeners("Removing any non-unique edges from removed triangles.", sendIterativeListenerNotifications);
 
          if (!edges.isEmpty()) {
             DelaunayTriangulation.getUniqueEdges(edges, output);
-            if(sendIterativeListenerNotifications) {
-               edges.removeAll(output);
-               DelaunayTriangulation.this.notifyListeners("Number of unique edges found: " + output.size() + ". Creating new Triangles from unique edge list and inserted vertex.", edges.toArray());
-            }
+            edges.removeAll(output);
+            DelaunayTriangulation.this.notifyListeners("Number of unique edges found: " + output.size()
+                  + ". Creating new Triangles from unique edge list and inserted vertex.", sendIterativeListenerNotifications, edges.toArray());
 
             Triangle2d triangle;
 
@@ -133,34 +123,31 @@ public class DelaunayTriangulation implements Iterative {
                // continue;
                // }
 
+               try {
+                  triangle.getCircumscribedCircle();
+               } catch (final Exception e) {
+                  // invalid triangle; probably colinear
+                  continue;
+               }
+
                newTriangles.add(triangle);
                DelaunayTriangulation.this.addTriangle(triangle);
-               if(sendIterativeListenerNotifications) {
-                  DelaunayTriangulation.this.notifyListeners("Triangle added: " + triangle, triangle);
-               }
+               DelaunayTriangulation.this.notifyListeners("Triangle added: " + triangle, sendIterativeListenerNotifications, triangle);
             }
          } else {
-            if(sendIterativeListenerNotifications) {
-               DelaunayTriangulation.this.notifyListeners("No unique edges; something probably went wrong.");
-            }
+            DelaunayTriangulation.this.notifyListeners("No unique edges; something probably went wrong.", sendIterativeListenerNotifications);
          }
 
          if (!newTriangles.isEmpty()) {
-            if(sendIterativeListenerNotifications) {
-               DelaunayTriangulation.this.notifyListeners("Total Triangles added: " + newTriangles.size()
-                     + "; verifying Delaunay properties.", newTriangles.toArray());
-            }
-            DelaunayTriangulation.this.verifyDelaunay(newTriangles);
+            DelaunayTriangulation.this.notifyListeners("Total Triangles added: " + newTriangles.size() + "; verifying Delaunay properties.",
+                  sendIterativeListenerNotifications, newTriangles.toArray());
+            DelaunayTriangulation.this.verifyDelaunay(newTriangles, sendIterativeListenerNotifications);
          } else {
-            if(sendIterativeListenerNotifications) {
-               DelaunayTriangulation.this.notifyListeners("No new Triangles; something probably went wrong.");
-            }
+            DelaunayTriangulation.this.notifyListeners("No new Triangles; something probably went wrong.", sendIterativeListenerNotifications);
          }
       }
 
-      if(sendIterativeListenerNotifications) {
-         DelaunayTriangulation.this.notifyListeners("Addition of new Vertex complete.", vertex);
-      }
+      DelaunayTriangulation.this.notifyListeners("Addition of new Vertex complete.", sendIterativeListenerNotifications, vertex);
       DelaunayTriangulation.this.isBusy = false;
    }
 
@@ -203,6 +190,13 @@ public class DelaunayTriangulation implements Iterative {
          return;
       }
 
+      try {
+         triangle.getCircumscribedCircle();
+      } catch (final Exception e) {
+         // invalid triangle; probably colinear and didn't get caught above somehow?
+         return;
+      }
+
       this.triangles.add(triangle);
 
       Set<Triangle2d> set;
@@ -219,32 +213,33 @@ public class DelaunayTriangulation implements Iterative {
       }
    }
 
-   private void verifyDelaunay(final Set<Triangle2d> toCheck) {
+   private void verifyDelaunay(final Set<Triangle2d> toCheck, final boolean notifyListeners) {
       final Set<Triangle2d> toCheckNext = new HashSet<Triangle2d>();
 
       Set<Triangle2d> neighbors;
       Pair<Triangle2d, Triangle2d> newTriangles;
       boolean hasFlipped = false;
 
+      this.notifyListeners("Checking neighbors for invalid triangulation.\nThis occurs if the sum of the two internal angles opposite the shared"
+            + " edge exceed 180 degrees. With our recursive iterative algorithm, it should rarely occur.", notifyListeners, toCheck.toArray());
+
       for (final Triangle2d triangle : toCheck) {
          neighbors = this.getNeighbors(triangle);
-         this.notifyListeners("Checking neighbors of " + triangle
-               + " for invalid triangulation.\nThis occurs if the sum of the two internal angles opposite the shared"
-               + " edge exceed 180 degrees. With our recursive iterative algorithm, it should rarely occur.", neighbors.toArray(), triangle);
 
          for (final Triangle2d neighbor : neighbors) {
             if (hasFlipped) {
-               this.notifyListeners("Adding existing triangles to next verify loop: " + neighbor, neighbor);
+               this.notifyListeners("Adding existing triangles to next verify loop: " + neighbor, notifyListeners, neighbor);
                toCheckNext.add(neighbor);
             } else if ((newTriangles = this.fixDelaunay(triangle, neighbor)) != null) {
-               this.notifyListeners("Removing invalid delaunay triangulation and flipping shared edge.", triangle, neighbor);
+               System.out.println("flip " + toCheck.size());
+               this.notifyListeners("Removing invalid delaunay triangulation and flipping shared edge.", notifyListeners, triangle, neighbor);
                this.removeTriangle(triangle);
                this.removeTriangle(neighbor);
-               this.notifyListeners("Removed triangles: " + triangle + ", " + neighbor, triangle, neighbor);
+               this.notifyListeners("Removed triangles: " + triangle + ", " + neighbor, notifyListeners, triangle, neighbor);
 
                this.addTriangle(newTriangles.left);
                this.addTriangle(newTriangles.right);
-               this.notifyListeners("Flipped additions: " + newTriangles.left + ", " + newTriangles.right, newTriangles.left, newTriangles.right);
+               this.notifyListeners("Flipped additions: " + newTriangles.left + ", " + newTriangles.right, notifyListeners, newTriangles.left, newTriangles.right);
 
                toCheckNext.add(newTriangles.left);
                toCheckNext.add(newTriangles.right);
@@ -255,10 +250,11 @@ public class DelaunayTriangulation implements Iterative {
       }
 
       if (!toCheckNext.isEmpty()) {
-         this.notifyListeners("Verifying delaunay with remainder of new triangles list along with all flipped triangles.", toCheckNext.toArray());
-         this.verifyDelaunay(toCheckNext);
+         this.notifyListeners("Verifying delaunay with remainder of new triangles list along with all flipped triangles.", notifyListeners,
+               toCheckNext.toArray());
+         this.verifyDelaunay(toCheckNext, notifyListeners);
       } else {
-         this.notifyListeners("Verification complete.");
+         this.notifyListeners("Verification complete.", notifyListeners);
       }
    }
 
@@ -293,7 +289,9 @@ public class DelaunayTriangulation implements Iterative {
       final Set<Triangle2d> neighbors = new HashSet<Triangle2d>();
 
       for (final LineSegment segment : triangle.getLineSegments()) {
-         neighbors.addAll(this.edgesToTrianglesMap.get(segment));
+         if (this.edgesToTrianglesMap.containsKey(segment)) {
+            neighbors.addAll(this.edgesToTrianglesMap.get(segment));
+         }
       }
 
       // TODO: do this better
@@ -331,8 +329,8 @@ public class DelaunayTriangulation implements Iterative {
       this.listeners.remove(listener);
    }
 
-   private void notifyListeners(final String message, final Object... payload) {
-      if(!this.listeners.isEmpty()) {
+   private void notifyListeners(final String message, final boolean doNotify, final Object... payload) {
+      if (!this.listeners.isEmpty() && doNotify) {
          this.isWaiting = true;
          this.continueCtr = this.listeners.size();
 
