@@ -68,7 +68,7 @@ public class InteractiveDelaunay {
       final int width = 800;
       final int height = 500;
       final List<Point> clicks = new ArrayList<Point>();
-      final Triangle2d boundingTriangle = new Triangle2d(new Tuple2d(0, 0), new Tuple2d(width * 10, 0), new Tuple2d(0, height * 10));
+      final Triangle2d boundingTriangle = new Triangle2d(new Tuple2d(-width, -height), new Tuple2d(width * 10, -height), new Tuple2d(-width, height * 10));
       final DelaunayTriangulation dt = new DelaunayTriangulation(boundingTriangle);
       final List<Tuple2d> eventVertices = new CopyOnWriteArrayList<Tuple2d>();
       final List<LineSegment> eventEdges = new CopyOnWriteArrayList<LineSegment>();
@@ -103,9 +103,9 @@ public class InteractiveDelaunay {
                final Point onScreen = this.getLocationOnScreen();
                final boolean contains = t.contains(new Tuple2d(mousePos.x - onScreen.x, mousePos.y - onScreen.y));
                if (contains) {
-                  ((Graphics2D) g).setStroke(new BasicStroke(3f));
+                  ((Graphics2D) g).setStroke(new BasicStroke(4f));
                } else {
-                  ((Graphics2D) g).setStroke(new BasicStroke(1f));
+                  ((Graphics2D) g).setStroke(new BasicStroke(2f));
                }
 
                g.setColor(Color.DARK_GRAY.darker().darker());
@@ -117,14 +117,14 @@ public class InteractiveDelaunay {
 
                   if (contains) {
                      g.setColor(Color.red);
+                     ((Graphics2D) g).setStroke(new BasicStroke(3f));
                   } else {
                      g.setColor(Color.blue);
+                     ((Graphics2D) g).setStroke(new BasicStroke(1f));
                   }
 
                   g.drawOval((int) (c.getCenter().x - c.getRadius()), (int) (c.getCenter().y - c.getRadius()), (int) (c.getRadius() * 2.0),
                         (int) (c.getRadius() * 2.0));
-
-                  ((Graphics2D) g).setStroke(new BasicStroke(1f));
                }
             }
 
@@ -135,7 +135,7 @@ public class InteractiveDelaunay {
             }
 
             g.setColor(Color.green);
-            ((Graphics2D) g).setStroke(new BasicStroke(2f));
+            ((Graphics2D) g).setStroke(new BasicStroke(3f));
 
             for(final LineSegment edge : eventEdges) {
                g.drawLine((int)edge.min.x, (int)edge.min.y, (int)edge.max.x, (int)edge.max.y);
@@ -315,7 +315,7 @@ public class InteractiveDelaunay {
 
             if(useDelay.isSelected()) {
                try {
-                  Thread.sleep(100);
+                  Thread.sleep(((Number) delay.getValue()).intValue());
                } catch (final InterruptedException e) {
                   e.printStackTrace();
                }
@@ -337,7 +337,7 @@ public class InteractiveDelaunay {
    }
 
    private static void loadFile(final File file, final DelaunayTriangulation dt) throws FileNotFoundException, IOException {
-      final List<Tuple2d> vertices = new ArrayList<Tuple2d>();
+      final Set<Tuple2d> vertices = new HashSet<Tuple2d>();
 
       if (file.getAbsolutePath().endsWith(".ply")) {
          final PlyModelLoader loader = new PlyModelLoader();
@@ -348,7 +348,10 @@ public class InteractiveDelaunay {
             vertices.add(new Tuple2d(vertex));
          }
       } else if (file.getAbsolutePath().endsWith(".vl2")) {
-         VertexListLoader.loadVertexList2d(file, vertices);
+         final List<Tuple2d> tempVertices = new ArrayList<Tuple2d>();
+         VertexListLoader.loadVertexList2d(file, tempVertices);
+         // make sure we don't have duplicates
+         vertices.addAll(tempVertices);
       }
 
       for (final Tuple2d vertex : vertices) {
