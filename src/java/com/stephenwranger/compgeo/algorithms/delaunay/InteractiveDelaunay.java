@@ -15,14 +15,20 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -33,19 +39,26 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.BevelBorder;
+import javax.swing.filechooser.FileFilter;
 
 import com.stephenwranger.graphics.math.Tuple2d;
 import com.stephenwranger.graphics.math.Tuple3d;
 import com.stephenwranger.graphics.math.intersection.IntersectionUtils;
 import com.stephenwranger.graphics.math.intersection.LineSegment;
-import com.stephenwranger.graphics.math.intersection.Triangle2D;
+import com.stephenwranger.graphics.math.intersection.Triangle2d;
 import com.stephenwranger.graphics.renderables.Circle;
 import com.stephenwranger.graphics.utils.Iterative;
 import com.stephenwranger.graphics.utils.IterativeListener;
 import com.stephenwranger.graphics.utils.TimeUtils;
+import com.stephenwranger.graphics.utils.models.PlyModelLoader;
+import com.stephenwranger.graphics.utils.models.VertexListLoader;
 
 public class InteractiveDelaunay {
    private static boolean isEnableCircles = false;
+
+   private enum FileMode {
+      LOAD, SAVE;
+   }
 
    public static void main(final String[] args) {
       final JFrame frame = new JFrame("Interactive Delaunay Triangulation");
@@ -54,13 +67,13 @@ public class InteractiveDelaunay {
       final int width = 800;
       final int height = 500;
       final List<Point> clicks = new ArrayList<Point>();
-      final Triangle2D boundingTriangle = new Triangle2D(new Tuple2d(0, 0), new Tuple2d(width * 10, 0), new Tuple2d(0, height * 10));
+      final Triangle2d boundingTriangle = new Triangle2d(new Tuple2d(0, 0), new Tuple2d(width * 10, 0), new Tuple2d(0, height * 10));
       final DelaunayTriangulation dt = new DelaunayTriangulation(boundingTriangle);
       final List<Tuple2d> eventVertices = new CopyOnWriteArrayList<Tuple2d>();
       final List<LineSegment> eventEdges = new CopyOnWriteArrayList<LineSegment>();
       final List<Circle> eventCircles = new CopyOnWriteArrayList<Circle>();
-      final List<Triangle2D> eventTriangles = new CopyOnWriteArrayList<Triangle2D>();
-      
+      final List<Triangle2d> eventTriangles = new CopyOnWriteArrayList<Triangle2d>();
+
       final JPanel panel = new JPanel() {
          private static final long serialVersionUID = -5113240506547207623L;
 
@@ -73,7 +86,7 @@ public class InteractiveDelaunay {
             Circle c;
             Tuple3d bary;
 
-            mainLoop: for (final Triangle2D t : dt.getTriangles()) {
+            mainLoop: for (final Triangle2d t : dt.getTriangles()) {
                corners = t.getCorners();
 
                // don't draw if it's attached to the bounding triangle
@@ -119,15 +132,15 @@ public class InteractiveDelaunay {
             for (final Point vert : clicks) {
                g.fillOval(vert.x - 3, vert.y - 3, 6, 6);
             }
-            
+
             g.setColor(Color.green);
             ((Graphics2D) g).setStroke(new BasicStroke(2f));
-            
+
             for(final LineSegment edge : eventEdges) {
                g.drawLine((int)edge.min.x, (int)edge.min.y, (int)edge.max.x, (int)edge.max.y);
             }
-            
-            for(final Triangle2D triangle : eventTriangles) {
+
+            for(final Triangle2d triangle : eventTriangles) {
                for(final LineSegment edge : triangle.getLineSegments()) {
                   g.drawLine((int)edge.min.x, (int)edge.min.y, (int)edge.max.x, (int)edge.max.y);
                }
@@ -136,7 +149,7 @@ public class InteractiveDelaunay {
             g.setColor(Color.green.darker());
             for(final Circle circle : eventCircles) {
                g.drawOval((int) (circle.getCenter().x - circle.getRadius()), (int) (circle.getCenter().y - circle.getRadius()), (int) (circle.getRadius() * 2.0),
-                          (int) (circle.getRadius() * 2.0));
+                     (int) (circle.getRadius() * 2.0));
             }
 
             g.setColor(Color.green.darker().darker());
@@ -145,7 +158,7 @@ public class InteractiveDelaunay {
             }
          }
       };
-      
+
       final JPanel messagePanel = new JPanel(new GridLayout(1, 1));
       messagePanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED, Color.GRAY, Color.DARK_GRAY));
       final JTextArea messageArea = new JTextArea();
@@ -212,14 +225,14 @@ public class InteractiveDelaunay {
             eventTriangles.clear();
          }
       });
-      
+
       // TODO: add file of points ingestion
 
 
       final JCheckBox useDelay = new JCheckBox("Use Step Delay");
       useDelay.setSelected(false);
       useDelay.setMaximumSize(new Dimension(200, 30));
-      
+
       final JLabel delayLabel = new JLabel("Step Delay (ms)");
       final JSpinner delay = new JSpinner(new SpinnerNumberModel(100, 0, Integer.MAX_VALUE, 1));
       final JPanel delayPanel = new JPanel();
@@ -227,6 +240,16 @@ public class InteractiveDelaunay {
       delayPanel.setMaximumSize(new Dimension(200, 60));
       delayPanel.add(delayLabel);
       delayPanel.add(delay);
+
+      final JButton loadFilePlyButton = new JButton("Load PLY File");
+      loadFilePlyButton.addActionListener(InteractiveDelaunay.getFileListener(loadFilePlyButton, dt, ".ply", FileMode.LOAD));
+      final JButton loadFileVl2Button = new JButton("Load VL2 File");
+      loadFileVl2Button.addActionListener(InteractiveDelaunay.getFileListener(loadFileVl2Button, dt, ".vl2", FileMode.LOAD));
+
+      final JButton saveFilePlyButton = new JButton("Save PLY File");
+      saveFilePlyButton.addActionListener(InteractiveDelaunay.getFileListener(saveFilePlyButton, dt, ".ply", FileMode.SAVE));
+      final JButton saveFileVl2Button = new JButton("Save VL2 File");
+      saveFileVl2Button.addActionListener(InteractiveDelaunay.getFileListener(saveFileVl2Button, dt, ".vl2", FileMode.SAVE));
 
       final JPanel leftPanel = new JPanel();
       leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
@@ -238,6 +261,19 @@ public class InteractiveDelaunay {
       leftPanel.add(useDelay);
       delayPanel.setAlignmentX( Component.LEFT_ALIGNMENT );
       leftPanel.add(delayPanel);
+
+      loadFilePlyButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+      leftPanel.add(loadFilePlyButton);
+
+      loadFileVl2Button.setAlignmentX(Component.LEFT_ALIGNMENT);
+      leftPanel.add(loadFileVl2Button);
+
+      saveFilePlyButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+      leftPanel.add(saveFilePlyButton);
+
+      saveFileVl2Button.setAlignmentX(Component.LEFT_ALIGNMENT);
+      leftPanel.add(saveFileVl2Button);
+
       leftPanel.setMaximumSize(new Dimension(200, 500));
       leftPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED, Color.GRAY, Color.DARK_GRAY));
 
@@ -246,7 +282,7 @@ public class InteractiveDelaunay {
       content.add(panel, BorderLayout.CENTER);
       content.add(leftPanel, BorderLayout.EAST);
       content.add(messagePanel, BorderLayout.SOUTH);
-      
+
       dt.addIterativeListener(new IterativeListener() {
          @Override
          public void step(final Iterative source, final String message, final List<Object> payload) {
@@ -256,7 +292,7 @@ public class InteractiveDelaunay {
             eventEdges.clear();
             eventCircles.clear();
             eventTriangles.clear();
-            
+
             for(final Object p : payload) {
                if(p instanceof Tuple2d) {
                   eventVertices.add((Tuple2d)p);
@@ -264,19 +300,19 @@ public class InteractiveDelaunay {
                   eventEdges.add((LineSegment)p);
                } else if(p instanceof Circle) {
                   eventCircles.add((Circle)p);
-               } else if(p instanceof Triangle2D) {
-                  eventTriangles.add((Triangle2D)p);
+               } else if(p instanceof Triangle2d) {
+                  eventTriangles.add((Triangle2d)p);
                }
             }
-            
+
             if(useDelay.isSelected()) {
                try {
                   Thread.sleep(100);
-               } catch (InterruptedException e) {
+               } catch (final InterruptedException e) {
                   e.printStackTrace();
                }
             }
-            
+
             source.continueIteration();
             panel.repaint();
          }
@@ -290,5 +326,84 @@ public class InteractiveDelaunay {
             frame.setVisible(true);
          }
       });
+   }
+
+   private static void loadFile(final File file, final DelaunayTriangulation dt) throws FileNotFoundException, IOException {
+      final List<Tuple2d> vertices = new ArrayList<Tuple2d>();
+
+      if (file.getAbsolutePath().endsWith(".ply")) {
+         final PlyModelLoader loader = new PlyModelLoader();
+         final List<Tuple3d> outputVertices = new ArrayList<Tuple3d>();
+         loader.loadModel(file, null, outputVertices);
+
+         for (final Tuple3d vertex : outputVertices) {
+            vertices.add(new Tuple2d(vertex));
+         }
+      } else if (file.getAbsolutePath().endsWith(".vl2")) {
+         VertexListLoader.loadVertexList2d(file, vertices);
+      }
+
+      for (final Tuple2d vertex : vertices) {
+         dt.addVertex(vertex);
+      }
+   }
+
+   private static ActionListener getFileListener(final Component parent, final DelaunayTriangulation dt, final String extension, final FileMode mode) {
+      final JFileChooser fc = new JFileChooser();
+      fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+      fc.setAcceptAllFileFilterUsed(false);
+      fc.setFileFilter(new FileFilter() {
+         @Override
+         public boolean accept(File pathname) {
+            return pathname.getAbsolutePath().endsWith(extension);
+         }
+
+         @Override
+         public String getDescription() {
+            return extension;
+         }
+      });
+
+      return new ActionListener() {
+         @Override
+         public void actionPerformed(ActionEvent e) {
+            int value = -1;
+            if (mode == FileMode.LOAD) {
+               value = fc.showOpenDialog(parent);
+
+               if (value == JFileChooser.APPROVE_OPTION) {
+                  try {
+                     InteractiveDelaunay.loadFile(fc.getSelectedFile(), dt);
+                  } catch (final IOException e1) {
+                     e1.printStackTrace();
+                  }
+               }
+            } else if(mode == FileMode.SAVE) {
+               value = fc.showSaveDialog(parent);
+
+               if (value == JFileChooser.APPROVE_OPTION) {
+                  File file = fc.getSelectedFile();
+
+                  if (!file.getAbsolutePath().endsWith(extension)) {
+                     file = new File(file.getAbsolutePath() + extension);
+                  }
+
+                  try {
+                     if (extension.equals(".ply")) {
+                        final Set<Triangle2d> triangles = new HashSet<Triangle2d>(dt.getImmutableTriangles());
+
+                        PlyModelLoader.writePlyModel2d(file, triangles);
+                     } else if (extension.equals(".vl2")) {
+                        final Set<Tuple2d> vertices = new HashSet<Tuple2d>(dt.getImmutableVertices());
+
+                        VertexListLoader.writeVertexList2d(file, vertices);
+                     }
+                  } catch (final IOException ex) {
+                     ex.printStackTrace();
+                  }
+               }
+            }
+         }
+      };
    }
 }
