@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import javax.activity.InvalidActivityException;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -170,36 +171,6 @@ public class InteractiveDelaunay {
       messagePane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
       messagePanel.add(messagePane);
 
-      final MouseAdapter mouseListener = new MouseAdapter() {
-         long lastAddition = 0;
-
-         @Override
-         public void mouseClicked(final MouseEvent e) {
-            if(!dt.isBusy()) {
-               clicks.add(e.getPoint());
-               dt.addVertex(new Tuple2d(e.getX(), e.getY()));
-               panel.repaint();
-            }
-         }
-
-         @Override
-         public void mouseDragged(final MouseEvent e) {
-            if (System.nanoTime() - this.lastAddition > 200 * TimeUtils.NANOSECONDS_TO_MILLISECONDS) {
-               this.mouseClicked(e);
-               this.lastAddition = System.nanoTime();
-            }
-         }
-
-         @Override
-         public void mouseMoved(final MouseEvent e) {
-            panel.repaint();
-         }
-      };
-
-      panel.setPreferredSize(new Dimension(800, 500));
-      panel.addMouseListener(mouseListener);
-      panel.addMouseMotionListener(mouseListener);
-
       final JCheckBox enableCircles = new JCheckBox("Enable Circumcircles");
       enableCircles.setSelected(false);
       enableCircles.setMaximumSize(new Dimension(200, 30));
@@ -283,6 +254,43 @@ public class InteractiveDelaunay {
       content.add(leftPanel, BorderLayout.EAST);
       content.add(messagePanel, BorderLayout.SOUTH);
 
+      final MouseAdapter mouseListener = new MouseAdapter() {
+         long lastAddition = 0;
+
+         @Override
+         public void mouseClicked(final MouseEvent e) {
+            if (!dt.isBusy()) {
+               clicks.add(e.getPoint());
+
+               try {
+                  dt.addVertex(new Tuple2d(e.getX(), e.getY()), useDelay.isSelected());
+               } catch (final InvalidActivityException e1) {
+                  // we check for busy so shouldn't be a problem
+                  e1.printStackTrace();
+               }
+
+               panel.repaint();
+            }
+         }
+
+         @Override
+         public void mouseDragged(final MouseEvent e) {
+            if (System.nanoTime() - this.lastAddition > 200 * TimeUtils.NANOSECONDS_TO_MILLISECONDS) {
+               this.mouseClicked(e);
+               this.lastAddition = System.nanoTime();
+            }
+         }
+
+         @Override
+         public void mouseMoved(final MouseEvent e) {
+            panel.repaint();
+         }
+      };
+
+      panel.setPreferredSize(new Dimension(800, 500));
+      panel.addMouseListener(mouseListener);
+      panel.addMouseMotionListener(mouseListener);
+
       dt.addIterativeListener(new IterativeListener() {
          @Override
          public void step(final Iterative source, final String message, final List<Object> payload) {
@@ -344,18 +352,26 @@ public class InteractiveDelaunay {
       }
 
       for (final Tuple2d vertex : vertices) {
-         dt.addVertex(vertex);
+         dt.addVertex(vertex, false);
+
+         while (dt.isBusy()) {
+            try {
+               Thread.sleep(10);
+            } catch (final InterruptedException e) {
+               e.printStackTrace();
+            }
+         }
       }
    }
 
    private static ActionListener getFileListener(final Component parent, final DelaunayTriangulation dt, final String extension, final FileMode mode) {
-      final JFileChooser fc = new JFileChooser();
+      final JFileChooser fc = new JFileChooser(System.getProperty("user.home") + "/Desktop");
       fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
       fc.setAcceptAllFileFilterUsed(false);
       fc.setFileFilter(new FileFilter() {
          @Override
          public boolean accept(File pathname) {
-            return pathname.getAbsolutePath().endsWith(extension);
+            return pathname.isDirectory() || pathname.getAbsolutePath().endsWith(extension);
          }
 
          @Override
