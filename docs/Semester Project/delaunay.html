@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1 plus MathML 2.0//EN" "http://www.w3.org/Math/DTD/mathml2/xhtml-math11-f.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><!--This file was converted to xhtml by LibreOffice - see http://cgit.freedesktop.org/libreoffice/core/tree/filter/source/xslt for the code.--><head profile="http://dublincore.org/documents/dcmi-terms/"><meta http-equiv="Content-Type" content="application/xhtml+xml; charset=utf-8"/><title xml:lang="en-US">- no title specified</title><meta name="DCTERMS.title" content="" xml:lang="en-US"/><meta name="DCTERMS.language" content="en-US" scheme="DCTERMS.RFC4646"/><meta name="DCTERMS.source" content="http://xml.openoffice.org/odf2xhtml"/><meta name="DCTERMS.creator" content="Ranger Stephen W CTR USAF AFMC AFRL/RISB"/><meta name="DCTERMS.issued" content="2015-05-15T19:38:00" scheme="DCTERMS.W3CDTF"/><meta name="DCTERMS.modified" content="2015-05-15T16:38:28.304000000" scheme="DCTERMS.W3CDTF"/><meta name="DCTERMS.provenance" content="" xml:lang="en-US"/><meta name="DCTERMS.subject" content="," xml:lang="en-US"/><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/" hreflang="en"/><link rel="schema.DCTERMS" href="http://purl.org/dc/terms/" hreflang="en"/><link rel="schema.DCTYPE" href="http://purl.org/dc/dcmitype/" hreflang="en"/><link rel="schema.DCAM" href="http://purl.org/dc/dcam/" hreflang="en"/><style type="text/css">
+	@page {  }
+	table { border-collapse:collapse; border-spacing:0; empty-cells:show }
+	td, th { vertical-align:top; font-size:12pt;}
+	h1, h2, h3, h4, h5, h6 { clear:both }
+	ol, ul { margin:0; padding:0;}
+	li { list-style: none; margin:0; padding:0;}
+	<!-- "li span.odfLiEnd" - IE 7 issue-->
+	li span. { clear: both; line-height:0; width:0; height:0; margin:0; padding:0; }
+	span.footnodeNumber { padding-right:1em; }
+	span.annotation_style_by_filter { font-size:95%; font-family:Arial; background-color:#fff000;  margin:0; border:0; padding:0;  }
+	* { margin:0;}
+	.P1 { font-size:11pt; line-height:100%; margin-bottom:0in; margin-top:0in; text-align:left ! important; font-family:Calibri; writing-mode:lr-tb; }
+	.P11 { font-size:11pt; line-height:100%; margin-bottom:0in; margin-top:0in; text-align:left ! important; font-family:Calibri; writing-mode:lr-tb; }
+	.P12 { font-size:11pt; line-height:100%; margin-bottom:0in; margin-top:0in; text-align:left ! important; font-family:Calibri; writing-mode:lr-tb; }
+	.P13 { font-size:11pt; line-height:100%; margin-bottom:0in; margin-top:0in; text-align:left ! important; font-family:Calibri; writing-mode:lr-tb; }
+	.P2 { font-size:11pt; line-height:100%; margin-bottom:0in; margin-top:0in; text-align:left ! important; font-family:Calibri; writing-mode:lr-tb; }
+	.P3 { font-size:11pt; line-height:100%; margin-bottom:0in; margin-top:0in; text-align:left ! important; font-family:Calibri; writing-mode:lr-tb; }
+	.P4 { font-size:11pt; line-height:100%; margin-bottom:0in; margin-top:0in; text-align:left ! important; font-family:Calibri; writing-mode:lr-tb; }
+	.P5 { font-size:11pt; line-height:100%; margin-bottom:0in; margin-top:0in; text-align:left ! important; font-family:Calibri; writing-mode:lr-tb; }
+	.P6 { font-size:11pt; line-height:100%; margin-bottom:0in; margin-top:0in; text-align:left ! important; font-family:Calibri; writing-mode:lr-tb; }
+	.P7 { font-size:11pt; line-height:100%; margin-bottom:0in; margin-top:0in; text-align:left ! important; font-family:Calibri; writing-mode:lr-tb; margin-left:0in; margin-right:0in; text-indent:0.5in; }
+	.P8 { font-size:16pt; line-height:100%; margin-bottom:0in; margin-top:0in; text-align:left ! important; font-family:Calibri; writing-mode:lr-tb; font-weight:bold; }
+	.P9 { font-size:14pt; line-height:100%; margin-bottom:0in; margin-top:0in; text-align:left ! important; font-family:Calibri; writing-mode:lr-tb; font-weight:bold; }
+	.Standard { font-size:11pt; line-height:115%; margin-bottom:0.139in; margin-top:0in; font-family:Calibri; writing-mode:lr-tb; text-align:left ! important; }
+	.Bullet_20_Symbols { font-family:OpenSymbol; }
+	.Internet_20_link { color:#0000ff; text-decoration:underline; }
+	.T1 { font-size:14pt; font-weight:bold; }
+	.T2 { font-size:14pt; font-weight:bold; }
+	<!-- ODF styles with no properties representable as CSS -->
+	.T3 .T6 .T7  { }
+	</style></head><body dir="ltr" style="max-width:8.5in;margin-top:1in; margin-bottom:1in; margin-left:1in; margin-right:1in; writing-mode:lr-tb; "><p class="P8">Interactive Delaunay Triangulation</p><p class="P1">By Stephen Ranger</p><p class="P1"> </p><p class="P9">Background</p><p class="P1"><span> </span></p><p class="P1"><span> Delaunay Triangulation is a method for creating a triangle mesh between a set of vertices with no connectivity information required. </span></p><p class="P1"> </p><p class="P7">This algorithm I chose, which will be explained in the next section, is a Random Insertion Algorithm. The program loops through the given set of vertices, or as the user adds each subsequent vertex via the UI, and inserts it into the current triangle mesh. Initially, with no points added, there is a super triangle that encompasses the entire viewable area of the application; this is used as a starting point of the algorithm and in the final mesh, any triangles connected to this super triangle are removed.</p><p class="P1"> </p><p class="P1"><span> Also, any triangles that are computed as co-linear (three points on the same line) are ignored. Ideally, the algorithm would split them along the common vertex but as this is a teaching tool for the algorithm itself, this was not as important to show as it happens very rarely. Also, if two points are identical, the second point is ignored and no triangulation occurs.</span></p><p class="P1"> </p><p class="P3"><span> <span class="T6">In order to get the interactive stepping to work, the addition of a vertex creates a new thread when a vertex is given to the DelaunayTriangulation class which then marks itself busy, starts the thread, and returns to the caller (my application). The application then knows to wait until it is no longer busy before sending another algorithm. If it doesn't, an exception is thrown. This makes sure the same triangles aren't replaced when points nearby are added simultaneously as the algorithm can only work with one insertion at a time.</span></span></p><p class="P3"> </p><p class="P4"><span> <span class="T6">The data structures used could very well be improved. Ideally, this application would implement a triangle partition tree (similar to a quadtree) where every time a triangle is inserted it is linked to its parent triangle and its neighbors. Also, every time a triangle is split the original triangles are kept in the map and used as parent triangles to the new triangles. This would create a quadtree-like structure for searching circumcircular intersections. Unfortunately, it is much more complicated and with this being a visual aid, not entirely necessary. Instead the algorithm uses the following:</span></span></p><ul><li><p class="P11" style="margin-left:0cm;"><span class="Bullet_20_Symbols" style="display:block;float:left;min-width:0.635cm;">•</span>a list of all vertices added (for drawing)<span class="odfLiEnd"/> </p></li><li><p class="P12" style="margin-left:0cm;"><span class="Bullet_20_Symbols" style="display:block;float:left;min-width:0.635cm;">•</span>a map linking edges to triangles (for neighbor lookups)<span class="odfLiEnd"/> </p></li><li><p class="P12" style="margin-left:0cm;"><span class="Bullet_20_Symbols" style="display:block;float:left;min-width:0.635cm;">•</span>a set of all triangles (checks equality to remove duplicates)<span class="odfLiEnd"/> </p></li><li><p class="P12" style="margin-left:0cm;"><span class="Bullet_20_Symbols" style="display:block;float:left;min-width:0.635cm;">•</span>the bouding (super) triangle <span class="T7">(for culling points outside the working area; just in case the window is resized too far)</span><span class="odfLiEnd"/> </p><p class="P12" style="margin-left:0cm;"><span class="Bullet_20_Symbols" style="display:block;float:left;min-width:0cm"><!-- --></span><span class="odfLiEnd"/> </p></li></ul><p class="P6"><span> Finally, The DelaunayTriangulation class accepts an “IterativeListener” which notifies the listener when iteration events occur. This is how the animating triangulation is done in the UI. Every time a “step” is completed in the algorithm, it sends a message and a list of optional objects for display; in this case, vertices, edges, triangles, and circles. The application will then (optionally) display the message, render the given objects in a special color (green), and wait for the user-defined delay. If the user has disabled iterative stepping this all is skipped. In either instance, the algorithm is told to continue iteration.</span></p><p class="P1"> </p><p class="P9">Algorithm</p><p class="P1">Pseudo-code for the Algorithm used</p><p class="P1"> </p><p class="P13"> </p>
+	
+	<pre>
+  while adding vertices
+    if vertex count &lt; 3; insert only
+    else if vertex count == 3; make a single triangle
+      // this is the super triangle in my implementation
+      else
+        get all triangles where vertex falls inside their circumcircle
+        remove triangles from mesh
+        keep only unique edges (external edges)
+        for each external edge, create new triangle with inserted vertex
+        add new triangles into mesh
+        check all added triangles with each of its neighbors
+          if the sum of opposite angles from shared edge exceed 180, flip shared edge
+  done
+   </pre>
+   
+	<p class="P5"><span> </span><span> </span></p><p class="P1"> </p><p class="P1"> </p><p class="P1"><span class="T1">Download Application (Java8 </span><span class="T2">Windows/Linux Tested</span><span class="T1">)</span></p><p class="P2"><span> <a href="http://stephenwranger.com/compgeo/delaunay_ranger_stephen.zip" class="Internet_20_link"><span class="T3">http://stephenwranger.com/compgeo/delaunay_ranger_stephen.zip</span></a></span></p><p class="P2"> </p><p class="P1"> </p></body></html>
