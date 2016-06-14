@@ -345,7 +345,7 @@ public class InteractiveDelaunay {
          loader.loadModel(file, null, outputVertices);
 
          for (final Tuple3d vertex : outputVertices) {
-            vertices.add(new Tuple2d(vertex));
+            vertices.add(new Tuple2d(vertex.x, vertex.y));
          }
       } else if (file.getAbsolutePath().endsWith(".vl2")) {
          final List<Tuple2d> tempVertices = new ArrayList<Tuple2d>();
