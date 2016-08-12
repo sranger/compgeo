@@ -43,6 +43,16 @@ public class DelaunayTriangulation implements Iterative {
       this.addVertexImpl(corners[1], false);
       this.addVertexImpl(corners[2], false);
    }
+   
+   public void addTriangle(final Triangle2d triangle, final boolean sendIterativeListenerNotification) throws InvalidActivityException {
+      if (this.isBusy) {
+         throw new InvalidActivityException("Cannot add a new vertex while the triangulation is busy.");
+      }
+      
+      this.vertices.addAll(Arrays.asList(triangle.getCorners()));
+      this.triangles.add(triangle);
+      DelaunayTriangulation.this.notifyListeners("Added static triangle to output", sendIterativeListenerNotification, triangle);
+   }
 
    public void addVertex(final Tuple2d vertex, final boolean sendIterativeListenerNotifications) throws InvalidActivityException {
       if (this.isBusy) {
@@ -56,15 +66,19 @@ public class DelaunayTriangulation implements Iterative {
          return;
       }
 
-      this.isBusy = true;
-      new Thread() {
-         @Override
-         public void run() {
-            synchronized (DelaunayTriangulation.this) {
-               DelaunayTriangulation.this.addVertexImpl(vertex, sendIterativeListenerNotifications);
+      if(sendIterativeListenerNotifications) {
+         this.isBusy = true;
+         new Thread() {
+            @Override
+            public void run() {
+               synchronized (DelaunayTriangulation.this) {
+                  DelaunayTriangulation.this.addVertexImpl(vertex, sendIterativeListenerNotifications);
+               }
             }
-         }
-      }.start();
+         }.start();
+      } else {
+         DelaunayTriangulation.this.addVertexImpl(vertex, sendIterativeListenerNotifications);
+      }
    }
 
    private void addVertexImpl(final Tuple2d vertex, final boolean sendIterativeListenerNotifications) {
@@ -231,7 +245,6 @@ public class DelaunayTriangulation implements Iterative {
                this.notifyListeners("Adding existing triangles to next verify loop: " + neighbor, notifyListeners, neighbor);
                toCheckNext.add(neighbor);
             } else if ((newTriangles = this.fixDelaunay(triangle, neighbor)) != null) {
-               System.out.println("flip " + toCheck.size());
                this.notifyListeners("Removing invalid delaunay triangulation and flipping shared edge.", notifyListeners, triangle, neighbor);
                this.removeTriangle(triangle);
                this.removeTriangle(neighbor);
