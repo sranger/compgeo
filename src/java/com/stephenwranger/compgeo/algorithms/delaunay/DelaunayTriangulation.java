@@ -38,18 +38,24 @@ public class DelaunayTriangulation implements Iterative {
    public DelaunayTriangulation(final Triangle2d boundingTriangle) {
       this.boundingTriangle = boundingTriangle;
 
-      final Tuple2d[] corners = this.boundingTriangle.getCorners();
+      final Tuple2d[] corners = this.boundingTriangle.getCorners(false);
       this.addVertexImpl(corners[0], false);
       this.addVertexImpl(corners[1], false);
       this.addVertexImpl(corners[2], false);
    }
    
+   /**
+    * TODO: this does NOT triangulate correctly atm
+    * @param triangle
+    * @param sendIterativeListenerNotification
+    * @throws InvalidActivityException
+    */
    public void addTriangle(final Triangle2d triangle, final boolean sendIterativeListenerNotification) throws InvalidActivityException {
       if (this.isBusy) {
          throw new InvalidActivityException("Cannot add a new vertex while the triangulation is busy.");
       }
       
-      this.vertices.addAll(Arrays.asList(triangle.getCorners()));
+      this.vertices.addAll(Arrays.asList(triangle.getCorners(false)));
       this.triangles.add(triangle);
       DelaunayTriangulation.this.notifyListeners("Added static triangle to output", sendIterativeListenerNotification, triangle);
    }
@@ -88,7 +94,7 @@ public class DelaunayTriangulation implements Iterative {
 
       if (DelaunayTriangulation.this.vertices.size() == 3) {
          DelaunayTriangulation.this.addTriangle(new Triangle2d(DelaunayTriangulation.this.vertices.get(0), DelaunayTriangulation.this.vertices.get(1),
-               DelaunayTriangulation.this.vertices.get(2)));
+               DelaunayTriangulation.this.vertices.get(2), false));
       } else if (DelaunayTriangulation.this.vertices.size() > 3) {
          final List<Triangle2d> needsReplacing = new ArrayList<Triangle2d>();
          Circle c = null;
@@ -127,7 +133,7 @@ public class DelaunayTriangulation implements Iterative {
             Triangle2d triangle;
 
             for (final LineSegment segment : output) {
-               triangle = new Triangle2d(segment.min, segment.max, vertex);
+               triangle = new Triangle2d(segment.min, segment.max, vertex, false);
 
                // final double left = (segment.max.y - segment.min.y) * (vertex.x - segment.max.x);
                // final double right = (vertex.y - segment.max.y) * (segment.max.x - segment.min.x);
@@ -174,7 +180,7 @@ public class DelaunayTriangulation implements Iterative {
       this.vertices.clear();
       this.edgesToTrianglesMap.clear();
 
-      final Tuple2d[] corners = this.boundingTriangle.getCorners();
+      final Tuple2d[] corners = this.boundingTriangle.getCorners(false);
       this.addVertexImpl(corners[0], false);
       this.addVertexImpl(corners[1], false);
       this.addVertexImpl(corners[2], false);
@@ -195,7 +201,7 @@ public class DelaunayTriangulation implements Iterative {
    }
 
    private void addTriangle(final Triangle2d triangle) {
-      final Tuple2d[] corners = triangle.getCorners();
+      final Tuple2d[] corners = triangle.getCorners(false);
       final double left = (corners[1].y - corners[0].y) * (corners[2].x - corners[1].x);
       final double right = (corners[2].y - corners[1].y) * (corners[1].x - corners[0].x);
 
@@ -289,8 +295,8 @@ public class DelaunayTriangulation implements Iterative {
       if (angle > 180.0) {
          final Tuple2d commonVertex1 = corner1.left.getCommonVertex(corner1.right);
          final Tuple2d commonVertex2 = corner2.left.getCommonVertex(corner2.right);
-         final Triangle2d newT1 = new Triangle2d(edge.min, commonVertex1, commonVertex2);
-         final Triangle2d newT2 = new Triangle2d(edge.max, commonVertex1, commonVertex2);
+         final Triangle2d newT1 = new Triangle2d(edge.min, commonVertex1, commonVertex2, false);
+         final Triangle2d newT2 = new Triangle2d(edge.max, commonVertex1, commonVertex2, false);
 
          return Pair.getInstance(newT1, newT2);
       }
