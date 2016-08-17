@@ -68,7 +68,7 @@ public class InteractiveDelaunay {
       final int width = 800;
       final int height = 500;
       final List<Point> clicks = new ArrayList<Point>();
-      final Triangle2d boundingTriangle = new Triangle2d(new Tuple2d(-width, -height), new Tuple2d(width * 10, -height), new Tuple2d(-width, height * 10));
+      final Triangle2d boundingTriangle = new Triangle2d(new Tuple2d(-width, -height), new Tuple2d(width * 10, -height), new Tuple2d(-width, height * 10), false);
       final DelaunayTriangulation dt = new DelaunayTriangulation(boundingTriangle);
       final List<Tuple2d> eventVertices = new CopyOnWriteArrayList<Tuple2d>();
       final List<LineSegment> eventEdges = new CopyOnWriteArrayList<LineSegment>();
@@ -88,7 +88,7 @@ public class InteractiveDelaunay {
             Tuple3d bary;
 
             mainLoop: for (final Triangle2d t : dt.getTriangles()) {
-               corners = t.getCorners();
+               corners = t.getCorners(false);
 
                // don't draw if it's attached to the bounding triangle
                for (final Tuple2d corner : corners) {
