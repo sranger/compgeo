@@ -4,7 +4,6 @@
 	<classpathentry kind="src" path="src/resources"/>
 	<classpathentry kind="src" path="src/glsl"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
-	<classpathentry kind="lib" path="lib/com.stephenwranger.graphics.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.stephenwranger.graphics"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
