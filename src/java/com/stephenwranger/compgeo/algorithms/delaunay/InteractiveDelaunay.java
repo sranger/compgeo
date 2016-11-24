@@ -373,7 +373,7 @@ public class InteractiveDelaunay {
       fc.setAcceptAllFileFilterUsed(false);
       fc.setFileFilter(new FileFilter() {
          @Override
-         public boolean accept(File pathname) {
+         public boolean accept(final File pathname) {
             return pathname.isDirectory() || pathname.getAbsolutePath().endsWith(extension);
          }
 
@@ -385,7 +385,7 @@ public class InteractiveDelaunay {
 
       return new ActionListener() {
          @Override
-         public void actionPerformed(ActionEvent e) {
+         public void actionPerformed(final ActionEvent e) {
             int value = -1;
             if (mode == FileMode.LOAD) {
                value = fc.showOpenDialog(parent);
